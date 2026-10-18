@@ -1,8 +1,11 @@
 #!/bin/sh
-# Runs squire against a throwaway project and checks the flow and hygiene rules.
-squire=$(cd "$(dirname "$0")/.." && pwd)/squire
+# Installs into a throwaway prefix and checks the flow and hygiene rules.
 project=$(mktemp -d)
 trap 'rm -rf "$project"' EXIT
+make -s -C "$(dirname "$0")/.." install PREFIX="$project/prefix" || exit 1
+unset SQUIRE_AUTHOR
+export TASKRC="$project/prefix/share/taskwarrior-squire/taskrc" TASKDATA="$project/data"
+squire=task
 cd "$project" || exit 1
 failures=0
 
@@ -11,8 +14,6 @@ check() {
 }
 field() { "$squire" "$1" export | python3 -c "import json,sys; print(json.load(sys.stdin)[0].get('$2', ''))"; }
 uuid() { "$squire" "$1" _uuid; }
-
-"$squire" init >/dev/null
 
 SQUIRE_AUTHOR=claude "$squire" add "add rubocop" assignee:claude priority:H >/dev/null
 task=$(uuid 1)
@@ -23,6 +24,9 @@ SQUIRE_AUTHOR=claude "$squire" "$task" modify state:open >/dev/null 2>&1
 check "an agent cannot approve an idea" "$(field "$task" state)" idea
 SQUIRE_AUTHOR=claude "$squire" add "skip the approval" state:open >/dev/null 2>&1
 check "an agent cannot add an approved task" "$("$squire" count)" 1
+SQUIRE_AUTHOR=claude "$squire" add "a typo in the README" state:open +bug >/dev/null
+check "an agent adds a bug in any state" "$("$squire" +bug state:open count)" 1
+"$squire" +bug delete >/dev/null
 
 "$squire" "$task" modify state:open >/dev/null
 check "a human approves an idea" "$(field "$task" state)" open
@@ -49,14 +53,14 @@ check "the limits bind the human too" \
 
 SQUIRE_AUTHOR=claude "$squire" add "add a CI job for rubocop" assignee:claude depends:"$task" >/dev/null
 "$squire" 2 modify state:open >/dev/null
-check "the inbox lists unblocked work only" "$(SQUIRE_AUTHOR=claude "$squire" | grep -c '^## ')" 1
+check "the list lists unblocked work only" "$(SQUIRE_AUTHOR=claude "$squire" mine | grep -c '^## ')" 1
 
 SQUIRE_AUTHOR=claude "$squire" add "pick the cops" assignee:"$USER" "body:all, or enabled only?" >/dev/null
 SQUIRE_AUTHOR=claude "$squire" "$task" annotate "run them on the specs too?" >/dev/null
 SQUIRE_AUTHOR=claude "$squire" "$task" modify assignee:"$USER" >/dev/null
-inbox=$("$squire")
-check "the human's inbox holds what waits for them" "$(echo "$inbox" | grep -c '^## ')" 2
-check "the inbox shows the newest question" "$(echo "$inbox" | grep -c '^\[claude\] run them on the specs too?$')" 1
-check "the inbox shows the body when nobody asked" "$(echo "$inbox" | grep -c '^all, or enabled only?$')" 1
+inbox=$("$squire" mine)
+check "the human's list holds what waits for them" "$(echo "$inbox" | grep -c '^## ')" 2
+check "the list shows the newest question" "$(echo "$inbox" | grep -c '^\[claude\] run them on the specs too?$')" 1
+check "the list shows the body when nobody asked" "$(echo "$inbox" | grep -c '^all, or enabled only?$')" 1
 
 [ "$failures" -eq 0 ]

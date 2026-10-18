@@ -43,8 +43,11 @@ for annotation in new.get("annotations", []):
     check_length("comment", annotation["description"], COMMENT_MAX)
     annotation["description"] = f"[{actor}] {annotation['description']}"
 
-if old.get("state", "idea") == "idea" and new.get("state") not in (None, "idea") and not human:
-    refuse(f"only a human approves an idea; {actor} may not move it to {new['state']}")
+if not human and new.get("state", "idea") != "idea":
+    if not old and "bug" not in new.get("tags", []):
+        refuse(f"{actor} may add an idea, or a +bug in any state; a human approves the rest")
+    if old and old.get("state", "idea") == "idea":
+        refuse(f"only a human approves an idea; {actor} may not move it to {new['state']}")
 
 if not old:
     new["author"] = actor

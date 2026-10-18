@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+- Renamed to taskwarrior-squire. The `squire` wrapper is gone: set `TASKRC` and `TASKDATA`, then run `task`.
+- `task mine` replaces `squire` with no arguments.
+- `make install` puts the taskrc, the hook and `taskwarrior-squire(7)` under `PREFIX`.
+- An assistant may add a task tagged `+bug` in any state.
+
 ## [0.1.0] — 2026-10-19
 
 - taskwarrior with a project database: the nearest `.squire/` directory.

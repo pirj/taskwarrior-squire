@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""The live tasks assigned to $SQUIRE_AUTHOR, most urgent first, one section each.
+"""task mine: the live tasks assigned to $SQUIRE_AUTHOR (else $USER), most urgent first.
 
 A section shows the state, priority, version and ref of the task, and what
 the assignee is asked: the newest comment by someone else, else the body.
@@ -11,7 +11,7 @@ import re
 import subprocess
 import sys
 
-actor = os.environ["SQUIRE_AUTHOR"]
+actor = os.environ.get("SQUIRE_AUTHOR") or os.environ["USER"]
 tasks = json.loads(subprocess.run(
     ["task", "+READY", "state.not:postponed", f"assignee:{actor}", *sys.argv[1:], "export"],
     check=True, capture_output=True, text=True).stdout)
