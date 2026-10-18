@@ -27,17 +27,15 @@ It is [taskwarrior](https://taskwarrior.org) carrying three extra things: a flow
 
 Only a human moves a task out of `idea`. The human is whoever runs `squire` without `SQUIRE_AUTHOR`, or with it set to `$USER`.
 
-### Answering
+### What waits for you
 
-    squire questions                 # .squire/questions.md: everything assigned to you
-    cd .squire && tuicr --file questions.md
-    squire answers                   # each comment becomes your answer on its task
+    squire
 
-[tuicr](https://github.com/agavra/tuicr) is a review tool: comment on any line of a task's section. `squire answers` stores the comment as yours and hands the task back to whoever asked. On an `idea`, an answer that starts with «да», `ok`, `approve` or `+` also approves it. Answers are stored once, however often you run it.
+prints every live task assigned to you, most urgent first: one section each, with the question or the request on top. For an assistant it is the work queue. You answer with `squire <uuid> annotate`, or let the assistant carry your answers in from wherever you write them: a review tool, a chat. squire only keeps them.
 
 ### Rules of hygiene
 
-The limits bind assistants. The human writes what they need.
+The limits bind everyone, the human too.
 
 | Field | Limit |
 |---|---|
@@ -54,7 +52,7 @@ Each comment gets an `[author]` prefix. Each task records its `author`, and each
     squire 469e1a60 modify "body:Add rubocop, rubocop-rails and rubocop-rspec.
     One follow-up task per class of offence."
     squire 469e1a60 modify state:open assignee:claude
-    squire ready
+    squire
     squire 469e1a60 annotate "Added to all demos; follow-ups 9c1e0f2a, 77ab31d0"
     squire 469e1a60 modify state:fixed
     squire 469e1a60 done
@@ -75,7 +73,7 @@ Then tell it in `CLAUDE.md` or `AGENTS.md`: use `squire` for tasks, and read `sq
 
 ### Architecture
 
-The nearest `.squire/` directory up from the current one holds a taskwarrior database, one per project. `squire` is a shell script that points taskwarrior at it. The rules are a taskwarrior hook in Python. `squire-tuicr` turns questions into a file and tuicr comments into answers.
+The nearest `.squire/` directory up from the current one holds a taskwarrior database, one per project. Everything else is plain taskwarrior configuration: `squire.rc` declares the fields, the hooks directory, and `inbox` as an `execute` alias. The rules are a hook in Python. The `squire` script only finds the database and sets four variables; with `TASKRC`, `TASKDATA`, `SQUIRE_HOME` and `SQUIRE_AUTHOR` set, plain `task` is squire.
 
 Yes, you commit the SQLite file to git with every change. This is a known issue. The way out is known as well: TaskChampion's storage is pluggable, and [DoltLite](https://www.dolthub.com/blog/2026-03-25-doltlite/) is a SQLite with commits and merges. YAGNI (yet).
 
@@ -94,7 +92,7 @@ Yes, you commit the SQLite file to git with every change. This is a known issue.
     git clone https://github.com/pirj/squire ~/.local/share/squire
     ln -s ~/.local/share/squire/squire ~/.local/bin/squire
 
-Needs `python3`; answering needs `tuicr`. Tests: `test/run.sh`.
+Needs `python3`. Tests: `test/run.sh`.
 
 ## License
 

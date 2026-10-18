@@ -1,0 +1,32 @@
+#!/usr/bin/env python3
+"""The live tasks assigned to $SQUIRE_AUTHOR, most urgent first, one section each.
+
+A section shows the state, priority, version and ref of the task, and what
+the assignee is asked: the newest comment by someone else, else the body.
+Arguments narrow the filter.
+"""
+import json
+import os
+import re
+import subprocess
+import sys
+
+actor = os.environ["SQUIRE_AUTHOR"]
+tasks = json.loads(subprocess.run(
+    ["task", "+READY", "state.not:postponed", f"assignee:{actor}", *sys.argv[1:], "export"],
+    check=True, capture_output=True, text=True).stdout)
+
+
+def author_of(annotation):
+    match = re.match(r"\[([^\]]+)\] ", annotation["description"])
+    return match and match.group(1)
+
+
+for t in sorted(tasks, key=lambda t: -t["urgency"]):
+    request = next((a["description"] for a in reversed(t.get("annotations", []))
+                    if author_of(a) != actor), t.get("body"))
+    print(f"## {t['uuid'][:8]} — {t['description']}\n")
+    print(" · ".join(filter(None, (t.get("state"), t.get("priority"), t.get("version"), t.get("ref")))))
+    if request:
+        print(f"\n{request}")
+    print()

@@ -1,5 +1,7 @@
 verbose=nothing
 confirmation=off
+hooks.location=$SQUIRE_HOME/hooks
+alias.inbox=execute $SQUIRE_HOME/squire-inbox
 
 uda.state.type=string
 uda.state.label=State
@@ -23,9 +25,3 @@ uda.changed_by.label=Changed by
 
 uda.ref.type=string
 uda.ref.label=Ref
-
-report.ready.description=Work that is yours, approved and unblocked
-report.ready.filter=+READY state.not:idea state.not:postponed
-report.ready.columns=id,uuid.short,priority,state,version,depends,description.count
-report.ready.labels=ID,UUID,P,State,Version,Deps,Title
-report.ready.sort=urgency-

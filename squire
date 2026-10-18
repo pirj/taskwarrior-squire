@@ -3,21 +3,19 @@
 set -e
 
 home=$(dirname "$(readlink -f "$0")")
-actor=${SQUIRE_AUTHOR:-$USER}
+export SQUIRE_HOME="$home" SQUIRE_AUTHOR="${SQUIRE_AUTHOR:-$USER}"
 
 case "$1" in
   -h|--help|help)
-    cat <<EOF
-usage: squire <taskwarrior arguments>
-       squire init      create .squire/ in the current directory
-       squire ready     your approved, unblocked work, most urgent first
-       squire questions write .squire/questions.md: the tasks waiting for you, for tuicr
-       squire answers   store your tuicr comments on that file as answers
+    cat <<USAGE
+usage: squire                    the live tasks assigned to you, most urgent first
+       squire init               create .squire/ in the current directory
+       squire <taskwarrior arguments>
 
 The database is the nearest .squire/ in this directory or above it.
-Author of every change: \$SQUIRE_AUTHOR, else \$USER (now: $actor).
+Author of every change: \$SQUIRE_AUTHOR, else \$USER (now: $SQUIRE_AUTHOR).
 Everything else is taskwarrior: see 'task help'.
-EOF
+USAGE
     exit 0 ;;
   init)
     mkdir .squire
@@ -34,14 +32,6 @@ until [ -d "$dir/.squire" ]; do
   dir=$(dirname "$dir")
 done
 
-export TASKRC="$home/squire.rc" TASKDATA="$dir/.squire" SQUIRE_AUTHOR="$actor"
-
-case "$1" in
-  questions|answers) exec "$home/squire-tuicr" "$1" "$dir/.squire" ;;
-esac
-
-if [ "$1" = ready ]; then
-  shift
-  exec task rc.hooks.location="$home/hooks" ready assignee:"$actor" "$@"
-fi
-exec task rc.hooks.location="$home/hooks" "$@"
+export TASKRC="$home/squire.rc" TASKDATA="$dir/.squire"
+[ $# -gt 0 ] || set -- inbox
+exec task "$@"
