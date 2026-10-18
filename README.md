@@ -30,7 +30,7 @@ Then, in the project:
 
     squire init
 
-It sets `TASKRC` and `TASKDATA` for you (in `mise.toml`, else `.envrc`, else it prints them). For Claude Code it also writes the env into `.claude/settings.json` and copies the skill into `.claude/skills/`. Your `~/.taskrc` still applies; the squire taskrc includes it. The database, `taskchampion.sqlite3`, appears in the project root on first use. Commit it.
+It prints `TASKRC` and `TASKDATA`: set them for the project directory with whatever sets your per-directory environment (mise, direnv, …). For Claude Code it also writes the env into `.claude/settings.json` and copies the skill into `.claude/skills/`. Your `~/.taskrc` still applies; the squire taskrc includes it. The database, `taskchampion.sqlite3`, appears in the project root on first use. Commit it.
 
 ### Flow
 

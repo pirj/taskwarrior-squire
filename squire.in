@@ -1,15 +1,15 @@
 #!/usr/bin/env python3
 """squire init: point the project in the current directory at taskwarrior-squire.
 
-It sets TASKRC and TASKDATA for the human (mise.toml, else .envrc, else it
-prints the exports), and, when .claude/ exists, for Claude Code too: the env in
-.claude/settings.json and the skill in .claude/skills/. taskwarrior creates the
+It prints TASKRC and TASKDATA for you to set in this directory, with whatever
+sets your per-directory environment. When .claude/ exists, it writes them for
+Claude Code too: the env in .claude/settings.json and the skill in
+.claude/skills/. taskwarrior creates the
 database on first use. Everything after that is `task`: man taskwarrior-squire.
 """
 import json
 import os
 import shutil
-import subprocess
 import sys
 
 SHARE = "@SHARE@"
@@ -29,16 +29,8 @@ if not os.path.exists(home_rc):
     open(home_rc, "a").close()
     say(f"created an empty {home_rc}; the squire taskrc includes it")
 
-if shutil.which("mise") and not os.path.exists(".envrc"):
-    subprocess.run(["mise", "set", f"TASKRC={TASKRC}", "TASKDATA={{config_root}}"], check=True)
-    say("set TASKRC and TASKDATA in mise.toml; run `mise trust` once")
-elif shutil.which("direnv"):
-    with open(".envrc", "a") as envrc:
-        envrc.write(f'export TASKRC="{TASKRC}"\nexport TASKDATA="$PWD"\n')
-    say("set TASKRC and TASKDATA in .envrc; run `direnv allow` once")
-else:
-    say("set these in the project's environment:")
-    print(f'  export TASKRC="{TASKRC}"\n  export TASKDATA="{project}"')
+say("set these in this directory's environment (mise, direnv, an .env loader…):")
+print(f"  TASKRC={TASKRC}\n  TASKDATA={project}")
 
 if os.path.isdir(".claude"):
     path = ".claude/settings.json"

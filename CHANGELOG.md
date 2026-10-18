@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+## [0.2.1] — 2026-10-19
+
+- `squire init` prints `TASKRC` and `TASKDATA` for any per-directory env tool; it no longer writes `mise.toml` or `.envrc`.
+
+## [0.2.0] — 2026-10-19
+
 - Renamed to taskwarrior-squire. The `squire` wrapper is gone: set `TASKRC` and `TASKDATA`, then run `task`.
 - `task mine` replaces `squire` with no arguments.
 - `make install` puts the taskrc, the hook and `taskwarrior-squire(7)` under `PREFIX`.

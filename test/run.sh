@@ -18,7 +18,7 @@ claude() { SQUIRE_AUTHOR=claude task "$@" >/dev/null 2>&1; }
 codex() { SQUIRE_AUTHOR=codex task "$@" >/dev/null 2>&1; }
 human() { task "$@" >/dev/null 2>&1; }
 
-PATH=$(echo "$PATH" | tr : '\n' | grep -v -e mise -e direnv | paste -sd: -) squire init >/dev/null
+squire init >/dev/null
 check "init writes the assistant's env" \
   "$(python3 -c "import json; e=json.load(open('.claude/settings.json'))['env']; import os; print(e['SQUIRE_AUTHOR'], os.path.samefile(e['TASKDATA'], '.'))")" "claude True"
 check "init copies the skill" "$(head -2 .claude/skills/taskwarrior-squire/SKILL.md | tail -1)" "name: taskwarrior-squire"

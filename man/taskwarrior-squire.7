@@ -26,11 +26,9 @@ in the project root sets
 .Ev TASKRC
 to the installed taskrc and
 .Ev TASKDATA
-to the project, in
-.Pa mise.toml ,
-else in
-.Pa .envrc ,
-else it prints them.
+to the project, and prints both.
+Set them for the project directory with any tool that sets a per-directory
+environment, for example mise or direnv.
 When
 .Pa .claude/
 exists, it also writes them with
