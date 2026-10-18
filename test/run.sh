@@ -47,4 +47,27 @@ SQUIRE_AUTHOR=claude "$squire" add "add a CI job for rubocop" assignee:claude de
 "$squire" 2 modify state:open >/dev/null
 check "ready lists unblocked work only" "$(SQUIRE_AUTHOR=claude "$squire" ready | wc -l | tr -d ' ')" 1
 
+if command -v tuicr >/dev/null && command -v expect >/dev/null; then
+  export HOME="$project/home"
+  SQUIRE_AUTHOR=claude "$squire" add "pick the cops" assignee:"$USER" >/dev/null
+  idea=$(uuid 3)
+  SQUIRE_AUTHOR=claude "$squire" "$task" annotate "all cops, or only the enabled ones?" >/dev/null
+  SQUIRE_AUTHOR=claude "$squire" "$task" modify assignee:"$USER" >/dev/null
+  "$squire" questions >/dev/null
+  line() { grep -n "$1" .squire/questions.md | cut -d: -f1; }
+  (cd .squire && expect -c 'set timeout 4; spawn tuicr --no-update-check --file questions.md; sleep 2; send "q"; sleep 1; send "q"; expect eof' >/dev/null 2>&1)
+  session=$(tuicr review list --repo "$project/.squire" | python3 -c "import json,sys; print(json.load(sys.stdin)[0]['path'])")
+  tuicr review add --session "$session" --target-file questions.md --line "$(line "^\[claude\] all cops")" "all of them, pending too" >/dev/null
+  tuicr review add --session "$session" --target-file questions.md --line "$(($(line "pick the cops") + 1))" "да" >/dev/null
+  "$squire" answers >/dev/null
+  "$squire" answers >/dev/null
+  check "an answer from tuicr is the human's comment" \
+    "$("$squire" "$task" export | python3 -c "import json,sys; print(json.load(sys.stdin)[0]['annotations'][-1]['description'].split(' (tuicr')[0])")" \
+    "[$USER] all of them, pending too"
+  check "an answered task goes back to whoever asked" "$(field "$task" assignee)" claude
+  check "«да» from tuicr approves an idea" "$(field "$idea" state)" open
+  check "an answer is stored once" \
+    "$("$squire" "$task" export | python3 -c "import json,sys; print(len(json.load(sys.stdin)[0]['annotations']))")" 3
+fi
+
 [ "$failures" -eq 0 ]

@@ -1,0 +1,109 @@
+#!/usr/bin/env python3
+"""Questions to the human as a file for tuicr, and tuicr comments back as answers.
+
+  squire-tuicr questions DIR   write DIR/questions.md: every live task assigned to $USER
+  squire-tuicr answers DIR     store each new tuicr comment on DIR/questions.md
+                               as the human's comment on its task, and hand the task back
+"""
+import json
+import os
+import re
+import subprocess
+import sys
+
+APPROVAL = re.compile(r"^\s*(да|ok|approve|\+)(\W|$)", re.IGNORECASE)
+HEADER = re.compile(r"^## ([0-9a-f]{8}) ")
+human = os.environ["USER"]
+SQUIRE = os.path.join(os.path.dirname(os.path.realpath(__file__)), "squire")
+
+
+def task(*args):
+    env = dict(os.environ, SQUIRE_AUTHOR=human)
+    return subprocess.run([SQUIRE, *args], env=env, check=True,
+                          capture_output=True, text=True).stdout
+
+
+def tasks(*filter_args):
+    return json.loads(task(*filter_args, "export"))
+
+
+def author_of(annotation):
+    match = re.match(r"\[([^\]]+)\] ", annotation["description"])
+    return match and match.group(1)
+
+
+def asker(t):
+    for annotation in reversed(t.get("annotations", [])):
+        if author_of(annotation) not in (None, human):
+            return author_of(annotation)
+    return t.get("author")
+
+
+def sessions(directory):
+    listing = json.loads(subprocess.run(
+        ["tuicr", "review", "list", "--repo", directory],
+        check=True, capture_output=True, text=True).stdout)
+    return [s for s in listing if not s["active"] and s["comment_count"] > 0]
+
+
+def comments(directory):
+    for session in sessions(directory):
+        for comment in json.loads(subprocess.run(
+                ["tuicr", "review", "comments", "--session", session["path"]],
+                check=True, capture_output=True, text=True).stdout):
+            if comment["path"] == "questions.md":
+                yield comment
+
+
+def imported(t):
+    return {m for a in t.get("annotations", [])
+            for m in re.findall(r"\(tuicr ([0-9a-f-]{36})\)", a["description"])}
+
+
+def questions(directory):
+    seen = set().union(*(imported(t) for t in tasks()))
+    if any(c["id"] not in seen for c in comments(directory)):
+        sys.exit("squire: tuicr holds answers not stored yet; run 'squire answers' first")
+    blocks = []
+    for t in sorted(tasks("status:pending", f"assignee:{human}"),
+                    key=lambda t: -t.get("urgency", 0)):
+        block = [f"## {t['uuid'][:8]} — {t['description']}", "",
+                 " · ".join(filter(None, (t.get("state"), t.get("priority"), t.get("version"))))]
+        if t.get("body"):
+            block += ["", t["body"]]
+        question = next((a for a in reversed(t.get("annotations", []))
+                         if author_of(a) != human), None)
+        if question:
+            block += ["", question["description"]]
+        if t.get("state") == "idea":
+            block += ["", "Start the answer with «да» to approve."]
+        block += ["", "Answer:", ""]
+        blocks.append("\n".join(block))
+    path = os.path.join(directory, "questions.md")
+    with open(path, "w") as f:
+        f.write("\n".join(blocks))
+    print(f"{len(blocks)} question(s); answer with: cd {directory} && tuicr --file questions.md")
+
+
+def answers(directory):
+    with open(os.path.join(directory, "questions.md")) as f:
+        lines = f.read().splitlines()
+    stored = 0
+    for comment in sorted(comments(directory), key=lambda c: c["created_at"]):
+        headers = [HEADER.match(l) for l in lines[:comment["start_line"]]]
+        prefix = next((m.group(1) for m in reversed(headers) if m), None)
+        if prefix is None:
+            continue
+        t = tasks(prefix)[0]
+        if comment["id"] in imported(t):
+            continue
+        task(t["uuid"], "annotate", f"{comment['content']} (tuicr {comment['id']})")
+        changes = [f"assignee:{asker(t)}"]
+        if t.get("state") == "idea" and APPROVAL.match(comment["content"]):
+            changes.append("state:open")
+        task(t["uuid"], "modify", *changes)
+        stored += 1
+    print(f"{stored} answer(s) stored")
+
+
+{"questions": questions, "answers": answers}[sys.argv[1]](sys.argv[2])

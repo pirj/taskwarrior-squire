@@ -27,7 +27,17 @@ It is [taskwarrior](https://taskwarrior.org) carrying three extra things: a flow
 
 Only a human moves a task out of `idea`. The human is whoever runs `squire` without `SQUIRE_AUTHOR`, or with it set to `$USER`.
 
+### Answering
+
+    squire questions                 # .squire/questions.md: everything assigned to you
+    cd .squire && tuicr --file questions.md
+    squire answers                   # each comment becomes your answer on its task
+
+[tuicr](https://github.com/agavra/tuicr) is a review tool: comment on any line of a task's section. `squire answers` stores the comment as yours and hands the task back to whoever asked. On an `idea`, an answer that starts with «да», `ok`, `approve` or `+` also approves it. Answers are stored once, however often you run it.
+
 ### Rules of hygiene
+
+The limits bind assistants. The human writes what they need.
 
 | Field | Limit |
 |---|---|
@@ -65,7 +75,7 @@ Then tell it in `CLAUDE.md` or `AGENTS.md`: use `squire` for tasks, and read `sq
 
 ### Architecture
 
-The nearest `.squire/` directory up from the current one holds a taskwarrior database, one per project. `squire` is a shell script that points taskwarrior at it. The rules are a taskwarrior hook in Python.
+The nearest `.squire/` directory up from the current one holds a taskwarrior database, one per project. `squire` is a shell script that points taskwarrior at it. The rules are a taskwarrior hook in Python. `squire-tuicr` turns questions into a file and tuicr comments into answers.
 
 Yes, you commit the SQLite file to git with every change. This is a known issue. The way out is known as well: TaskChampion's storage is pluggable, and [DoltLite](https://www.dolthub.com/blog/2026-03-25-doltlite/) is a SQLite with commits and merges. YAGNI (yet).
 
@@ -84,7 +94,7 @@ Yes, you commit the SQLite file to git with every change. This is a known issue.
     git clone https://github.com/pirj/squire ~/.local/share/squire
     ln -s ~/.local/share/squire/squire ~/.local/bin/squire
 
-Needs `python3`. Tests: `test/run.sh`.
+Needs `python3`; answering needs `tuicr`. Tests: `test/run.sh`.
 
 ## License
 

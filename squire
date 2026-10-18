@@ -11,6 +11,8 @@ case "$1" in
 usage: squire <taskwarrior arguments>
        squire init      create .squire/ in the current directory
        squire ready     your approved, unblocked work, most urgent first
+       squire questions write .squire/questions.md: the tasks waiting for you, for tuicr
+       squire answers   store your tuicr comments on that file as answers
 
 The database is the nearest .squire/ in this directory or above it.
 Author of every change: \$SQUIRE_AUTHOR, else \$USER (now: $actor).
@@ -33,6 +35,10 @@ until [ -d "$dir/.squire" ]; do
 done
 
 export TASKRC="$home/squire.rc" TASKDATA="$dir/.squire" SQUIRE_AUTHOR="$actor"
+
+case "$1" in
+  questions|answers) exec "$home/squire-tuicr" "$1" "$dir/.squire" ;;
+esac
 
 if [ "$1" = ready ]; then
   shift
