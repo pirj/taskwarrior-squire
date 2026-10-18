@@ -1,0 +1,28 @@
+verbose=nothing
+confirmation=off
+
+uda.state.type=string
+uda.state.label=State
+uda.state.values=idea,open,doing,fixed,postponed
+uda.state.default=idea
+
+uda.assignee.type=string
+uda.assignee.label=Assignee
+
+uda.version.type=string
+uda.version.label=Version
+
+uda.body.type=string
+uda.body.label=Body
+
+uda.author.type=string
+uda.author.label=Author
+
+uda.changed_by.type=string
+uda.changed_by.label=Changed by
+
+report.ready.description=Work that is yours, approved and unblocked
+report.ready.filter=+READY state.not:idea state.not:postponed
+report.ready.columns=id,uuid.short,priority,state,version,depends,description.count
+report.ready.labels=ID,UUID,P,State,Version,Deps,Title
+report.ready.sort=urgency-

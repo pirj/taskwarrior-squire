@@ -1,0 +1,54 @@
+#!/usr/bin/env python3
+"""Hygiene and flow rules for every added or changed task.
+
+taskwarrior runs this file as on-add (one task on stdin) and on-modify
+(the old task, then the new one). It prints the task to store, or a
+refusal and a non-zero exit.
+"""
+import json
+import os
+import sys
+
+TITLE_MAX = 80
+BODY_MAX = 800
+COMMENT_MAX = 500
+
+actor = os.environ.get("SQUIRE_AUTHOR") or os.environ["USER"]
+human = actor == os.environ["USER"]
+
+
+def refuse(message):
+    print(message)
+    sys.exit(1)
+
+
+def check_length(field, text, limit):
+    if len(text) > limit:
+        refuse(f"{field} is {len(text)} > {limit} characters; "
+               "move the details to the commit message")
+
+
+lines = sys.stdin.read().splitlines()
+old = json.loads(lines[0]) if len(lines) == 2 else {}
+new = json.loads(lines[-1])
+
+for field, limit in (("description", TITLE_MAX), ("body", BODY_MAX)):
+    if new.get(field, "") != old.get(field, ""):
+        check_length(field, new.get(field, ""), limit)
+
+known = {(a["entry"], a["description"]) for a in old.get("annotations", [])}
+for annotation in new.get("annotations", []):
+    if (annotation["entry"], annotation["description"]) in known:
+        continue
+    check_length("comment", annotation["description"], COMMENT_MAX)
+    annotation["description"] = f"[{actor}] {annotation['description']}"
+
+if old.get("state", "idea") == "idea" and new.get("state") not in (None, "idea") and not human:
+    refuse(f"only a human approves an idea; {actor} may not move it to {new['state']}")
+
+if not old:
+    new["author"] = actor
+elif new != old:
+    new["changed_by"] = actor
+
+print(json.dumps(new, ensure_ascii=False))

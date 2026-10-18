@@ -1,0 +1,41 @@
+#!/bin/sh
+# squire: taskwarrior with the project's task database, flow and hygiene rules.
+set -e
+
+home=$(dirname "$(readlink -f "$0")")
+actor=${SQUIRE_AUTHOR:-$USER}
+
+case "$1" in
+  -h|--help|help)
+    cat <<EOF
+usage: squire <taskwarrior arguments>
+       squire init      create .squire/ in the current directory
+       squire ready     your approved, unblocked work, most urgent first
+
+The database is the nearest .squire/ in this directory or above it.
+Author of every change: \$SQUIRE_AUTHOR, else \$USER (now: $actor).
+Everything else is taskwarrior: see 'task help'.
+EOF
+    exit 0 ;;
+  init)
+    mkdir .squire
+    echo "created $PWD/.squire"
+    exit 0 ;;
+esac
+
+dir=$PWD
+until [ -d "$dir/.squire" ]; do
+  if [ "$dir" = / ]; then
+    echo "squire: no .squire/ here or above; run 'squire init' in the project root" >&2
+    exit 1
+  fi
+  dir=$(dirname "$dir")
+done
+
+export TASKRC="$home/squire.rc" TASKDATA="$dir/.squire" SQUIRE_AUTHOR="$actor"
+
+if [ "$1" = ready ]; then
+  shift
+  exec task rc.hooks.location="$home/hooks" ready assignee:"$actor" "$@"
+fi
+exec task rc.hooks.location="$home/hooks" "$@"
