@@ -1,4 +1,6 @@
 # taskwarrior-squire: set TASKRC to this file. See taskwarrior-squire(7).
+# Your own settings come first; the lines below override only what squire needs.
+include ~/.taskrc
 verbose=nothing
 confirmation=off
 hooks.location=@SHARE@/hooks
@@ -6,7 +8,7 @@ alias.mine=execute @SHARE@/mine
 
 uda.state.type=string
 uda.state.label=State
-uda.state.values=idea,open,doing,fixed,postponed
+uda.state.values=idea,open,doing,fixed,postponed,rejected
 uda.state.default=idea
 
 uda.assignee.type=string

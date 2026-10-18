@@ -8,6 +8,7 @@ refusal and a non-zero exit.
 import json
 import os
 import sys
+from datetime import datetime, timezone
 
 TITLE_MAX = 80
 BODY_MAX = 800
@@ -32,6 +33,12 @@ lines = sys.stdin.read().splitlines()
 old = json.loads(lines[0]) if len(lines) == 2 else {}
 new = json.loads(lines[-1])
 
+if new.get("status") == "deleted":
+    new["state"] = "rejected"
+elif new.get("state") == "rejected" and new.get("status") == "pending":
+    new["status"] = "deleted"
+    new["end"] = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+
 for field, limit in (("description", TITLE_MAX), ("body", BODY_MAX)):
     if new.get(field, "") != old.get(field, ""):
         check_length(field, new.get(field, ""), limit)
@@ -47,7 +54,7 @@ if not human and new.get("state", "idea") != "idea":
     if not old and "bug" not in new.get("tags", []):
         refuse(f"{actor} may add an idea, or a +bug in any state; a human approves the rest")
     if old and old.get("state", "idea") == "idea":
-        refuse(f"only a human approves an idea; {actor} may not move it to {new['state']}")
+        refuse(f"only a human decides on an idea; {actor} may not move it to {new['state']}")
 
 if not old:
     new["author"] = actor

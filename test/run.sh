@@ -1,66 +1,100 @@
 #!/bin/sh
-# Installs into a throwaway prefix and checks the flow and hygiene rules.
+# Installs into a throwaway prefix and checks the flow, the authors and the hygiene rules.
+root=$(cd "$(dirname "$0")/.." && pwd)
 project=$(mktemp -d)
 trap 'rm -rf "$project"' EXIT
-make -s -C "$(dirname "$0")/.." install PREFIX="$project/prefix" || exit 1
-unset SQUIRE_AUTHOR
-export TASKRC="$project/prefix/share/taskwarrior-squire/taskrc" TASKDATA="$project/data"
-squire=task
-cd "$project" || exit 1
+make -s -C "$root" install PREFIX="$project/prefix" || exit 1
+unset SQUIRE_AUTHOR TASKRC TASKDATA
+export HOME="$project/home" PATH="$project/prefix/bin:$PATH"
+mkdir -p "$HOME" "$project/app/.claude" && cd "$project/app" || exit 1
 failures=0
 
 check() {
   if [ "$2" = "$3" ]; then echo "ok   $1"; else echo "FAIL $1: expected '$3', got '$2'"; failures=$((failures + 1)); fi
 }
-field() { "$squire" "$1" export | python3 -c "import json,sys; print(json.load(sys.stdin)[0].get('$2', ''))"; }
-uuid() { "$squire" "$1" _uuid; }
+field() { task "$1" export | python3 -c "import json,sys; print(json.load(sys.stdin)[0].get('$2', ''))"; }
+comments() { task "$1" export | python3 -c "import json,sys; print(len(json.load(sys.stdin)[0].get('annotations', [])))"; }
+claude() { SQUIRE_AUTHOR=claude task "$@" >/dev/null 2>&1; }
+codex() { SQUIRE_AUTHOR=codex task "$@" >/dev/null 2>&1; }
+human() { task "$@" >/dev/null 2>&1; }
 
-SQUIRE_AUTHOR=claude "$squire" add "add rubocop" assignee:claude priority:H >/dev/null
-task=$(uuid 1)
+PATH=$(echo "$PATH" | tr : '\n' | grep -v -e mise -e direnv | paste -sd: -) squire init >/dev/null
+check "init writes the assistant's env" \
+  "$(python3 -c "import json; e=json.load(open('.claude/settings.json'))['env']; import os; print(e['SQUIRE_AUTHOR'], os.path.samefile(e['TASKDATA'], '.'))")" "claude True"
+check "init copies the skill" "$(head -2 .claude/skills/taskwarrior-squire/SKILL.md | tail -1)" "name: taskwarrior-squire"
+check "init leaves a ~/.taskrc for the include" "$(test -f "$HOME/.taskrc" && echo yes)" yes
+export TASKRC="$project/prefix/share/taskwarrior-squire/taskrc" TASKDATA="$PWD"
+echo "search.case.sensitive=no" >> "$HOME/.taskrc"
+check "the human's own taskrc still applies" "$(task _get rc.search.case.sensitive)" no
+
+claude add "add rubocop" assignee:claude priority:H
+task=$(task 1 _uuid)
 check "a new task is an idea" "$(field "$task" state)" idea
 check "the author is recorded" "$(field "$task" author)" claude
+claude "$task" modify state:open
+check "an assistant cannot approve an idea" "$(field "$task" state)" idea
+claude "$task" modify state:rejected
+check "an assistant cannot reject an idea" "$(field "$task" state)" idea
+claude "$task" delete
+check "an assistant cannot delete an idea" "$(field "$task" status)" pending
+claude add "skip the approval" state:open
+check "an assistant cannot add an approved task" "$(task count)" 1
+human "$task" modify state:open
+check "the human approves an idea" "$(field "$task" state)" open
+check "a change records who made it" "$(field "$task" changed_by)" "$USER"
 
-SQUIRE_AUTHOR=claude "$squire" "$task" modify state:open >/dev/null 2>&1
-check "an agent cannot approve an idea" "$(field "$task" state)" idea
-SQUIRE_AUTHOR=claude "$squire" add "skip the approval" state:open >/dev/null 2>&1
-check "an agent cannot add an approved task" "$("$squire" count)" 1
-SQUIRE_AUTHOR=claude "$squire" add "a typo in the README" state:open +bug >/dev/null
-check "an agent adds a bug in any state" "$("$squire" +bug state:open count)" 1
-"$squire" +bug delete >/dev/null
+claude "$task" modify state:doing
+claude "$task" annotate "added rubocop, commit 1a2b3c4"
+claude "$task" modify state:fixed
+check "an assistant walks open, doing, fixed" "$(field "$task" state)" fixed
+check "a change by an assistant records it" "$(field "$task" changed_by)" claude
+codex "$task" modify state:open
+codex "$task" annotate "reopened: the specs are not covered"
+check "a second assistant reopens a fixed task" "$(field "$task" state)" open
+check "each assistant signs its comments" \
+  "$(task "$task" export | python3 -c "import json,sys; print(' '.join(a['description'].split(']')[0] + ']' for a in json.load(sys.stdin)[0]['annotations']))")" \
+  "[claude] [codex]"
+codex "$task" modify state:fixed
+codex "$task" done
+check "a verified task is done" "$(field "$task" status)" completed
 
-"$squire" "$task" modify state:open >/dev/null
-check "a human approves an idea" "$(field "$task" state)" open
-check "the change records who made it" "$(field "$task" changed_by)" "$USER"
-
-SQUIRE_AUTHOR=claude "$squire" "$task" annotate "which cops?" >/dev/null
-check "a comment carries its author" \
-  "$("$squire" "$task" export | python3 -c "import json,sys; print(json.load(sys.stdin)[0]['annotations'][-1]['description'])")" \
-  "[claude] which cops?"
+codex add "a typo in the README" +bug state:open assignee:codex
+bug=$(task /typo/ _uuid)
+check "an assistant adds a bug in any state" "$(field "$bug" state)" open
+codex "$bug" annotate "cannot reproduce on main"
+codex "$bug" modify state:rejected
+check "rejected closes the task" "$(field "$bug" status)" deleted
+claude add "flaky spec" +bug state:open assignee:claude
+flaky=$(task /flaky/ _uuid)
+claude "$flaky" delete
+check "a deleted task is rejected" "$(field "$flaky" state)" rejected
 
 long=$(python3 -c "print('x' * 501)")
-SQUIRE_AUTHOR=claude "$squire" "$task" annotate "$long" >/dev/null 2>&1
-check "a long comment is refused" \
-  "$("$squire" "$task" export | python3 -c "import json,sys; print(len(json.load(sys.stdin)[0]['annotations']))")" 1
-
-"$squire" "$task" modify "body:first line
-second line" >/dev/null
-check "the body keeps line breaks" "$(field "$task" body)" "first line
+human add "long comments" assignee:"$USER"
+mine=$(task status:pending _uuid | head -1)
+human "$mine" annotate "$long"
+check "the limits bind the human too" "$(comments "$mine")" 0
+claude "$mine" annotate "$long"
+check "the limits bind an assistant" "$(comments "$mine")" 0
+human "$mine" modify "body:first line
 second line"
+check "the body keeps line breaks" "$(field "$mine" body)" "first line
+second line"
+claude "$mine" modify state:bogus
+check "an unknown state is refused" "$(field "$mine" state)" idea
 
-"$squire" "$task" annotate "$long" >/dev/null 2>&1
-check "the limits bind the human too" \
-  "$("$squire" "$task" export | python3 -c "import json,sys; print(len(json.load(sys.stdin)[0]['annotations']))")" 1
-
-SQUIRE_AUTHOR=claude "$squire" add "add a CI job for rubocop" assignee:claude depends:"$task" >/dev/null
-"$squire" 2 modify state:open >/dev/null
-check "the list lists unblocked work only" "$(SQUIRE_AUTHOR=claude "$squire" mine | grep -c '^## ')" 1
-
-SQUIRE_AUTHOR=claude "$squire" add "pick the cops" assignee:"$USER" "body:all, or enabled only?" >/dev/null
-SQUIRE_AUTHOR=claude "$squire" "$task" annotate "run them on the specs too?" >/dev/null
-SQUIRE_AUTHOR=claude "$squire" "$task" modify assignee:"$USER" >/dev/null
-inbox=$("$squire" mine)
-check "the human's list holds what waits for them" "$(echo "$inbox" | grep -c '^## ')" 2
-check "the list shows the newest question" "$(echo "$inbox" | grep -c '^\[claude\] run them on the specs too?$')" 1
-check "the list shows the body when nobody asked" "$(echo "$inbox" | grep -c '^all, or enabled only?$')" 1
+claude add "pick the cops" assignee:"$USER" "body:all, or enabled only?"
+asked=$(task /cops/ _uuid)
+claude add "run them on the specs too" assignee:"$USER"
+question=$(task /specs/ _uuid)
+claude "$question" annotate "on the specs as well?"
+claude add "later" assignee:"$USER" depends:"$asked"
+codex add "codex's own work" +bug state:open assignee:codex
+human "$mine" modify state:postponed
+list=$(task mine)
+check "mine lists the human's live, unblocked tasks" "$(echo "$list" | grep -c '^## ')" 2
+check "mine shows the newest question" "$(echo "$list" | grep -c '^\[claude\] on the specs as well?$')" 1
+check "mine shows the body when nobody asked" "$(echo "$list" | grep -c '^all, or enabled only?$')" 1
+check "each assistant sees only its own work" "$(SQUIRE_AUTHOR=codex task mine | grep -c '^## ')" 1
 
 [ "$failures" -eq 0 ]

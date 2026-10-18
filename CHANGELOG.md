@@ -6,6 +6,10 @@
 - `task mine` replaces `squire` with no arguments.
 - `make install` puts the taskrc, the hook and `taskwarrior-squire(7)` under `PREFIX`.
 - An assistant may add a task tagged `+bug` in any state.
+- `rejected` state for won't fix, cannot reproduce and the like; `task delete` rejects too.
+- `squire init` writes the project's environment and installs the assistant skill.
+- The squire taskrc includes `~/.taskrc`, so your own settings apply.
+- `brew install pirj/tap/taskwarrior-squire`.
 
 ## [0.1.0] — 2026-10-19
 

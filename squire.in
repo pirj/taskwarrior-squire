@@ -1,0 +1,58 @@
+#!/usr/bin/env python3
+"""squire init: point the project in the current directory at taskwarrior-squire.
+
+It sets TASKRC and TASKDATA for the human (mise.toml, else .envrc, else it
+prints the exports), and, when .claude/ exists, for Claude Code too: the env in
+.claude/settings.json and the skill in .claude/skills/. taskwarrior creates the
+database on first use. Everything after that is `task`: man taskwarrior-squire.
+"""
+import json
+import os
+import shutil
+import subprocess
+import sys
+
+SHARE = "@SHARE@"
+TASKRC = f"{SHARE}/taskrc"
+project = os.getcwd()
+
+if sys.argv[1:] != ["init"]:
+    sys.exit(__doc__.strip() + "\n\nusage: squire init")
+
+
+def say(text):
+    print(f"squire: {text}")
+
+
+home_rc = os.path.expanduser("~/.taskrc")
+if not os.path.exists(home_rc):
+    open(home_rc, "a").close()
+    say(f"created an empty {home_rc}; the squire taskrc includes it")
+
+if shutil.which("mise") and not os.path.exists(".envrc"):
+    subprocess.run(["mise", "set", f"TASKRC={TASKRC}", "TASKDATA={{config_root}}"], check=True)
+    say("set TASKRC and TASKDATA in mise.toml; run `mise trust` once")
+elif shutil.which("direnv"):
+    with open(".envrc", "a") as envrc:
+        envrc.write(f'export TASKRC="{TASKRC}"\nexport TASKDATA="$PWD"\n')
+    say("set TASKRC and TASKDATA in .envrc; run `direnv allow` once")
+else:
+    say("set these in the project's environment:")
+    print(f'  export TASKRC="{TASKRC}"\n  export TASKDATA="{project}"')
+
+if os.path.isdir(".claude"):
+    path = ".claude/settings.json"
+    settings = json.load(open(path)) if os.path.exists(path) else {}
+    env = settings.setdefault("env", {})
+    env.setdefault("SQUIRE_AUTHOR", "claude")
+    env.update(TASKRC=TASKRC, TASKDATA=project)
+    with open(path, "w") as f:
+        json.dump(settings, f, indent=2)
+        f.write("\n")
+    os.makedirs(".claude/skills/taskwarrior-squire", exist_ok=True)
+    shutil.copy(f"{SHARE}/SKILL.md", ".claude/skills/taskwarrior-squire/SKILL.md")
+    say(f"Claude Code: env in {path} (SQUIRE_AUTHOR={env['SQUIRE_AUTHOR']}), "
+        "skill in .claude/skills/taskwarrior-squire/")
+else:
+    say("another assistant: give it TASKRC, TASKDATA and SQUIRE_AUTHOR=<its name>, "
+        f"and point it at {SHARE}/SKILL.md")

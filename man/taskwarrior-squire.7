@@ -5,6 +5,8 @@
 .Nm taskwarrior-squire
 .Nd taskwarrior for one human and the AI assistants who work for them
 .Sh SYNOPSIS
+.Nm squire Cm init
+.Pp
 .Ev TASKRC Ns = Ns Pa $PREFIX/share/taskwarrior-squire/taskrc
 .Ev TASKDATA Ns = Ns Pa <project>
 .Ev SQUIRE_AUTHOR Ns = Ns Ar name
@@ -19,13 +21,27 @@ Every command is a
 .Xr task 1
 command.
 .Ss Setup
-Set three variables in the project, for example in
-.Pa mise.toml :
-.Bd -literal -offset indent
-[env]
-TASKRC = "{{env.HOME}}/.local/share/taskwarrior-squire/taskrc"
-TASKDATA = "{{config_root}}"
-.Ed
+.Nm squire Cm init
+in the project root sets
+.Ev TASKRC
+to the installed taskrc and
+.Ev TASKDATA
+to the project, in
+.Pa mise.toml ,
+else in
+.Pa .envrc ,
+else it prints them.
+When
+.Pa .claude/
+exists, it also writes them with
+.Ev SQUIRE_AUTHOR Ns =claude
+into
+.Pa .claude/settings.json
+and copies the assistant skill into
+.Pa .claude/skills/taskwarrior-squire/ .
+The taskrc includes
+.Pa ~/.taskrc
+first, so your own settings apply.
 .Pp
 .Ev TASKDATA
 is the directory that holds
@@ -39,12 +55,14 @@ Without it, the author is
 .Ss Fields
 .Bl -tag -width changed_by
 .It Cm state
-idea, open, doing, fixed or postponed.
+idea, open, doing, fixed, postponed or rejected.
 A new task is an idea.
 Done is
-.Cm task Ar uuid Cm done ;
-dropped is
-.Cm task Ar uuid Cm delete .
+.Cm task Ar uuid Cm done .
+Rejected (won't fix, cannot reproduce, not needed) closes the task;
+.Cm task Ar uuid Cm delete
+rejects it too.
+Comment why first.
 .It Cm assignee
 who acts next: the human for a question, an approval or a manual step.
 .It Cm body
@@ -66,7 +84,7 @@ The limits bind everyone.
 Each new comment gets the prefix
 .Li [author] .
 .It
-Only the human moves a task out of idea.
+Only the human moves a task out of idea, or rejects it.
 An assistant adds an idea, or a task tagged
 .Cm +bug
 in any state.
@@ -83,6 +101,11 @@ the newest comment by someone else, else the body.
 .Pp
 Refer to a task by its UUID prefix.
 taskwarrior renumbers its short numeric ids.
+.Sh FILES
+.Bl -tag -width Ds
+.It Pa $PREFIX/share/taskwarrior-squire/SKILL.md
+how an assistant works with the human through these tasks
+.El
 .Sh EXAMPLES
 .Bd -literal -offset indent
 SQUIRE_AUTHOR=claude task add "Add rubocop to the demos" assignee:pirj
