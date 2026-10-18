@@ -21,6 +21,9 @@ uda.author.label=Author
 uda.changed_by.type=string
 uda.changed_by.label=Changed by
 
+uda.ref.type=string
+uda.ref.label=Ref
+
 report.ready.description=Work that is yours, approved and unblocked
 report.ready.filter=+READY state.not:idea state.not:postponed
 report.ready.columns=id,uuid.short,priority,state,version,depends,description.count

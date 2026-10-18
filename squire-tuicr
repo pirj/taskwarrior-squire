@@ -69,12 +69,12 @@ def questions(directory):
                     key=lambda t: -t.get("urgency", 0)):
         block = [f"## {t['uuid'][:8]} — {t['description']}", "",
                  " · ".join(filter(None, (t.get("state"), t.get("priority"), t.get("version"))))]
-        if t.get("body"):
-            block += ["", t["body"]]
         question = next((a for a in reversed(t.get("annotations", []))
                          if author_of(a) != human), None)
         if question:
             block += ["", question["description"]]
+        elif t.get("body"):
+            block += ["", t["body"]]
         if t.get("state") == "idea":
             block += ["", "Start the answer with «да» to approve."]
         block += ["", "Answer:", ""]
