@@ -44,7 +44,7 @@ first, so your own settings apply.
 .Ev TASKDATA
 is the directory that holds
 .Pa taskchampion.sqlite3 .
-Commit that file.
+If it is in the repository, commit it with the change that made it.
 An assistant sets
 .Ev SQUIRE_AUTHOR
 to its own name.
@@ -53,13 +53,15 @@ Without it, the author is
 .Ss Fields
 .Bl -tag -width changed_by
 .It Cm state
-idea, open, doing, fixed, postponed or rejected.
+idea, open, doing, fixed, done, postponed or rejected.
 A new task is an idea.
-Done is
-.Cm task Ar uuid Cm done .
-Rejected (won't fix, cannot reproduce, not needed) closes the task;
+Done (verified) and rejected (won't fix, cannot reproduce, not needed)
+close the task.
+.Cm task Ar uuid Cm done
+sets done, and
 .Cm task Ar uuid Cm delete
-rejects it too.
+sets rejected.
+Another state opens the task again.
 Comment why first.
 .It Cm assignee
 who acts next: the human for a question, an approval or a manual step.

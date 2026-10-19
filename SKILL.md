@@ -24,7 +24,8 @@ what you are asked on top. A comment from the human is an answer: act on it.
 
 ## The flow
 
-    idea ──(human approves)──▶ open ──▶ doing ──▶ fixed ──(verified)──▶ done
+    idea ──human approves──▶ open ──assignee starts──▶ doing
+         ──assignee fixes──▶ fixed ──reviewer verifies──▶ done
 
 | You find | You add |
 |---|---|
@@ -33,9 +34,10 @@ what you are asked on top. A comment from the human is an answer: act on it.
 
 - Take a task: `task <uuid> modify state:doing`.
 - Finish it: comment what you did and the commit, then `state:fixed`.
-- Verify a fixed task before `task <uuid> done`. A wrong fix goes back to
-  `state:open` with a comment that says what failed.
-- Drop a task: comment why, then `task <uuid> delete`.
+- Verify a fixed task, comment what you checked, then `task <uuid> done`.
+  A wrong fix goes back to `state:open` with a comment that says what failed.
+- A task you will not do (won't fix, cannot reproduce, not needed): comment
+  why, then `state:rejected`. Only the human rejects an idea.
 - Work that waits for something else: `depends:<uuid>`. Work for later:
   `state:postponed`.
 - Never move a task out of `idea`. The hook refuses it.
@@ -60,7 +62,8 @@ The answer comes back as the human's comment, and the task comes back to you.
 ## Hygiene
 
 - A title is at most 80 characters, a body 800, a comment 500. The hook refuses
-  more. The details go in the commit message.
+  more.
 - One comment per event. Refer to tasks by UUID prefix: short numeric ids
   change.
-- Commit the database (`taskchampion.sqlite3`) with the change that made it.
+- If the database (`taskchampion.sqlite3`) is in the repository, commit it with
+  the change that made it.

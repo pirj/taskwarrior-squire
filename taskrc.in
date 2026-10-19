@@ -8,7 +8,7 @@ alias.mine=execute @SHARE@/mine
 
 uda.state.type=string
 uda.state.label=State
-uda.state.values=idea,open,doing,fixed,postponed,rejected
+uda.state.values=idea,open,doing,fixed,done,postponed,rejected
 uda.state.default=idea
 
 uda.assignee.type=string

@@ -8,11 +8,12 @@ refusal and a non-zero exit.
 import json
 import os
 import sys
-from datetime import datetime, timezone
 
 TITLE_MAX = 80
 BODY_MAX = 800
 COMMENT_MAX = 500
+STATE_OF_STATUS = {"completed": "done", "deleted": "rejected"}
+STATUS_OF_STATE = {state: status for status, state in STATE_OF_STATUS.items()}
 
 actor = os.environ.get("SQUIRE_AUTHOR") or os.environ["USER"]
 human = actor == os.environ["USER"]
@@ -26,18 +27,17 @@ def refuse(message):
 def check_length(field, text, limit):
     if len(text) > limit:
         refuse(f"{field} is {len(text)} > {limit} characters; "
-               "move the details to the commit message")
+               "shorten it")
 
 
 lines = sys.stdin.read().splitlines()
 old = json.loads(lines[0]) if len(lines) == 2 else {}
 new = json.loads(lines[-1])
 
-if new.get("status") == "deleted":
-    new["state"] = "rejected"
-elif new.get("state") == "rejected" and new.get("status") == "pending":
-    new["status"] = "deleted"
-    new["end"] = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+if new.get("status") != old.get("status") and new.get("status") in STATE_OF_STATUS:
+    new["state"] = STATE_OF_STATUS[new["status"]]
+elif new.get("state") != old.get("state"):
+    new["status"] = STATUS_OF_STATE.get(new.get("state"), "pending")
 
 for field, limit in (("description", TITLE_MAX), ("body", BODY_MAX)):
     if new.get(field, "") != old.get(field, ""):

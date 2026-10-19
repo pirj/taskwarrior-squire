@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+## [0.3.0] — 2026-10-19
+
+- `done` state: `task done` sets it, and `state:done` completes the task. Another state reopens a done or rejected task.
+
 ## [0.2.1] — 2026-10-19
 
 - `squire init` prints `TASKRC` and `TASKDATA` for any per-directory env tool; it no longer writes `mise.toml` or `.envrc`.

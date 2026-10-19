@@ -56,14 +56,18 @@ check "each assistant signs its comments" \
   "[claude] [codex]"
 codex "$task" modify state:fixed
 codex "$task" done
-check "a verified task is done" "$(field "$task" status)" completed
+check "a verified task is done" "$(field "$task" state) $(field "$task" status)" "done completed"
+codex "$task" modify state:open
+check "a done task reopens" "$(field "$task" status) $(field "$task" end)" "pending "
+codex "$task" modify state:done
+check "state done completes the task" "$(field "$task" status) $(field "$task" end | cut -c1-2)" "completed 20"
 
 codex add "a typo in the README" +bug state:open assignee:codex
 bug=$(task /typo/ _uuid)
 check "an assistant adds a bug in any state" "$(field "$bug" state)" open
 codex "$bug" annotate "cannot reproduce on main"
 codex "$bug" modify state:rejected
-check "rejected closes the task" "$(field "$bug" status)" deleted
+check "rejected closes the task" "$(field "$bug" status) $(field "$bug" end | cut -c1-2)" "deleted 20"
 claude add "flaky spec" +bug state:open assignee:claude
 flaky=$(task /flaky/ _uuid)
 claude "$flaky" delete
