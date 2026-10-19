@@ -100,5 +100,7 @@ check "mine lists the human's live, unblocked tasks" "$(echo "$list" | grep -c '
 check "mine shows the newest question" "$(echo "$list" | grep -c '^\[claude\] on the specs as well?$')" 1
 check "mine shows the body when nobody asked" "$(echo "$list" | grep -c '^all, or enabled only?$')" 1
 check "each assistant sees only its own work" "$(SQUIRE_AUTHOR=codex task mine | grep -c '^## ')" 1
+claude add "a long title that wraps when the terminal is eighty columns wide" +bug state:open
+check "board shows one line per live task" "$(task board | wc -l | tr -d ' ')" "$(task status:pending count)"
 
 [ "$failures" -eq 0 ]

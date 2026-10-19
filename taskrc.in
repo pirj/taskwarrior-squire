@@ -6,6 +6,12 @@ confirmation=off
 hooks.location=@SHARE@/hooks
 alias.mine=execute @SHARE@/mine
 
+report.board.description=Live tasks, one line each
+report.board.columns=uuid.short,state,assignee,priority,version,ref,description.truncated_count
+report.board.labels=UUID,State,Assignee,P,Version,Ref,Title
+report.board.filter=status:pending
+report.board.sort=urgency-
+
 uda.state.type=string
 uda.state.label=State
 uda.state.values=idea,open,doing,fixed,done,postponed,rejected

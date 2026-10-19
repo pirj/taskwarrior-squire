@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+## [0.4.0] — 2026-10-19
+
+- `task board`: every live task on one line, with state, assignee, priority, version and ref.
+
 ## [0.3.0] — 2026-10-19
 
 - `done` state: `task done` sets it, and `state:done` completes the task. Another state reopens a done or rejected task.

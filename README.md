@@ -9,6 +9,7 @@ It is [taskwarrior](https://taskwarrior.org) carrying a working agreement betwee
 - **A flow.** `state` is `idea`, `open`, `doing`, `fixed`, `done`, `postponed` or `rejected`. Only you approve an idea; an assistant files a broken thing with an obvious remedy as a `+bug` and gets on with it.
 - **Hand-offs.** `assignee` says who acts next. A question, an approval, a manual test, a push to production: the assistant assigns the task to you and says what it needs. You answer in a comment and assign the task back.
 - **`task mine`.** The live, unblocked tasks assigned to you, most urgent first, each with what you are asked on top. For an assistant, it is the work queue.
+- **`task board`.** Every live task on one line: UUID, state, assignee, priority, version, ref, title.
 - **Authors.** Every task, change and comment records who made it.
 - **Hygiene.** A title is at most 80 characters, a body 800, a comment 500, for everyone.
 - **A skill** that teaches an assistant all of the above.
@@ -71,11 +72,12 @@ You:
     task mine
     task 9c1e0f2a annotate "B: only the default cops" && task 9c1e0f2a modify assignee:claude
     task 77ab31d0 modify state:open
-    task state:idea list
+    task state:idea board
 
 The assistant:
 
     task mine
+    task board
     task 469e1a60 modify state:doing
     task 469e1a60 annotate "Added to all demos in 3f2a1c9"
     task 469e1a60 modify state:fixed
@@ -94,7 +96,7 @@ The assistant needs three variables: `TASKRC`, `TASKDATA`, and `SQUIRE_AUTHOR` s
 
 The taskrc declares the fields, the hooks directory, and `mine` as an `execute` alias. The rules are one hook in Python. `squire init` only writes the environment; after that, there is no squire binary between you and `task`.
 
-If the database lives in the repository, you commit `taskchampion.sqlite3` with every change, and two branches that change it conflict.
+If the database sits in a git-tracked directory, you choose whether to commit it or to ignore it. It is a binary file: git shows no diff for it.
 
 Tests: `make test`.
 

@@ -13,6 +13,7 @@
 .Nm task Ar ...
 .Pp
 .Nm task Cm mine Op Ar filter
+.Nm task Op Ar filter Cm board
 .Sh DESCRIPTION
 .Nm
 is a taskwarrior configuration and one hook.
@@ -44,7 +45,9 @@ first, so your own settings apply.
 .Ev TASKDATA
 is the directory that holds
 .Pa taskchampion.sqlite3 .
-If it is in the repository, commit it with the change that made it.
+If it sits in a git-tracked directory, you choose whether to commit it or to
+ignore it.
+It is a binary file: git shows no diff for it.
 An assistant sets
 .Ev SQUIRE_AUTHOR
 to its own name.
@@ -90,13 +93,16 @@ An assistant adds an idea, or a task tagged
 in any state.
 .El
 .Ss Commands
-.Bl -tag -width mine
+.Bl -tag -width board
 .It Cm mine
 the live, unblocked tasks assigned to
 .Ev SQUIRE_AUTHOR ,
 most urgent first.
 Each one shows what the assignee is asked:
 the newest comment by someone else, else the body.
+.It Cm board
+every live task on one line: UUID, state, assignee, priority, version, ref
+and title, most urgent first.
 .El
 .Pp
 Refer to a task by its UUID prefix.

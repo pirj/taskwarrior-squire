@@ -21,6 +21,7 @@ The reference is `man taskwarrior-squire`. Read it before your first command.
 
 It lists the live, unblocked tasks assigned to you, most urgent first, with
 what you are asked on top. A comment from the human is an answer: act on it.
+`task board` lists every live task on one line.
 
 ## The flow
 
@@ -57,13 +58,17 @@ The same goes for what only the human may do: a push to production, a manual
 test, a script your permissions forbid, an approval. Say exactly what to run or
 check, and assign the task to them.
 
-The answer comes back as the human's comment, and the task comes back to you.
+The answer comes back as the human's comment, on a task assigned to you again.
 
 ## Hygiene
 
 - A title is at most 80 characters, a body 800, a comment 500. The hook refuses
   more.
+- To change a body, write the full new text to a file, then
+  `task <uuid> modify "body:$(cat <file>)"`. The text arrives byte for byte.
+- `export` is a command, not a report: `task +tag export`, never
+  `task +tag all export`.
 - One comment per event. Refer to tasks by UUID prefix: short numeric ids
   change.
-- If the database (`taskchampion.sqlite3`) is in the repository, commit it with
-  the change that made it.
+- If git tracks the database (`taskchampion.sqlite3`), commit it with the
+  change that made it.
