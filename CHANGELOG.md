@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+## [0.7.0] — 2026-10-20
+
+- `taskwarrior-squire(7)` lists the command for every move in the flow, the question and the answer included.
+
 ## [0.6.0] — 2026-10-20
 
 - An assistant moves a task only along open → doing → fixed → done, and adds a `+bug` only as open. The human moves a task to any state.

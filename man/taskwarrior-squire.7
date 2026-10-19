@@ -112,6 +112,78 @@ the newest comment by someone else, else the body.
 every live task on one line: UUID, state, assignee, priority, version, ref
 and title, most urgent first.
 .El
+.Ss The flow, command by command
+.Bl -tag -width Ds
+.It Add new scope (anyone):
+.Bd -literal -compact
+task add "<title>" assignee:$USER
+.Ed
+The task is an idea.
+.It Add a bug (an assistant):
+.Bd -literal -compact
+task add "<title>" +bug state:open assignee:<name>
+.Ed
+.It Approve an idea (the human):
+.Bd -literal -compact
+task <uuid> modify state:open assignee:<name>
+.Ed
+.It Start (the assignee):
+.Bd -literal -compact
+task <uuid> modify state:doing
+.Ed
+Run it before the first change.
+.It Finish (the assignee):
+.Bd -literal -compact
+task <uuid> annotate "<what changed, the commit>"
+task <uuid> modify state:fixed
+.Ed
+.It Verify (a reviewer):
+.Bd -literal -compact
+task <uuid> annotate "<what was checked>"
+task <uuid> done
+.Ed
+.It Send back (a reviewer):
+.Bd -literal -compact
+task <uuid> annotate "<what failed>"
+task <uuid> modify state:open
+.Ed
+.It Postpone, resume:
+.Bd -literal -compact
+task <uuid> modify state:postponed
+task <uuid> modify state:open
+.Ed
+.It Reject:
+.Bd -literal -compact
+task <uuid> annotate "<why>"
+task <uuid> modify state:rejected
+.Ed
+Only the human rejects an idea.
+.It Block:
+.Bd -literal -compact
+task <uuid> modify depends:<uuid>
+.Ed
+The task leaves mine until the other one is done.
+.It Ask the human (an assistant):
+.Bd -literal -compact
+task <uuid> annotate "<the question>"
+task <uuid> modify assignee:$USER
+.Ed
+The same goes for an approval, a manual test or a push to production.
+.It Answer (the human):
+.Bd -literal -compact
+task <uuid> annotate "<the answer>"
+task <uuid> modify assignee:<asker>
+.Ed
+On an idea, the human adds the decision to the same modify:
+.Li state:open ,
+.Li state:rejected
+or
+.Li state:postponed .
+.It Read a task:
+.Bd -literal -compact
+task <uuid> info
+.Ed
+.El
 .Pp
 Refer to a task by its UUID prefix.
 taskwarrior renumbers its short numeric ids.

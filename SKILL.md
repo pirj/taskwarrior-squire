@@ -37,17 +37,21 @@ what you are asked on top. A comment from the human is an answer: act on it.
 A bug stays a bug when its remedy needs the human's decision: add it as above,
 then ask on it (below).
 
-Work only on a task in state `open`. Each step is one command, in this order:
+Work only on a task in state `open`, in this order:
 
 1. Before the first change: `task <uuid> modify state:doing`.
-2. After the fix: comment what you did and the commit, then `state:fixed`.
-3. After verification: comment what you checked, then `task <uuid> done`.
-   A wrong fix goes back to `state:open` with a comment that says what failed.
+2. After the fix: `task <uuid> annotate "<what changed, the commit>"`, then
+   `task <uuid> modify state:fixed`.
+3. After verification: `task <uuid> annotate "<what was checked>"`, then
+   `task <uuid> done`. A wrong fix goes back:
+   `task <uuid> annotate "<what failed>"`, then `task <uuid> modify state:open`.
 
-- A task you will not do (won't fix, cannot reproduce, not needed): comment
-  why, then `state:rejected`.
-- Work that waits for something else: `depends:<uuid>`. Work for later:
-  `state:postponed`.
+- A task you will not do (won't fix, cannot reproduce, not needed):
+  `task <uuid> annotate "<why>"`, then `task <uuid> modify state:rejected`.
+- Work that waits for another task: `task <uuid> modify depends:<other uuid>`.
+  Work for later: `task <uuid> modify state:postponed`; back with `state:open`.
+- Every move with its command: `man taskwarrior-squire`, "The flow, command
+  by command".
 - Never work on an idea, and never move a task out of `idea`. The hook refuses
   the move; only the human decides on an idea.
 
@@ -57,8 +61,8 @@ The human is needed only for product scope, a public promise, a risk they own,
 or a trade-off with no technically correct answer. A fact you can measure is
 not a question: measure it and write it into the task.
 
-1. Comment the question, in plain words, at most 500 characters:
-   `BROKEN: … HARM: … (A) … COST: … (B) … COST: … RECOMMENDATION: …`
+1. `task <uuid> annotate "<the question>"`, in plain words, at most 500
+   characters: `BROKEN: … HARM: … (A) … COST: … (B) … COST: … RECOMMENDATION: …`
 2. `task <uuid> modify assignee:$USER`.
 3. Continue with other work. Do not guess the answer. Do not ask in chat.
 
@@ -66,8 +70,10 @@ The same goes for what only the human may do: a push to production, a manual
 test, a script your permissions forbid, an approval. Say exactly what to run or
 check, and assign the task to the human.
 
-The answer comes back as the human's comment, and the human assigns the task
-back to you.
+The human answers with `task <uuid> annotate "<the answer>"` and assigns the
+task back to you; on an idea, that `modify` also sets `state:open`, `rejected` or
+`postponed`. The task then shows in your `task mine` with the answer on top.
+Act on it.
 
 ## Hygiene
 
