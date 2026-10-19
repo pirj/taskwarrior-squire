@@ -41,10 +41,16 @@ claude "$task" delete
 check "an assistant cannot delete an idea" "$(field "$task" status)" pending
 claude add "skip the approval" state:open
 check "an assistant cannot add an approved task" "$(task count)" 1
+claude "$task" modify state:doing
+check "an assistant cannot work on an idea" "$(field "$task" state)" idea
 human "$task" modify state:open
 check "the human approves an idea" "$(field "$task" state)" open
 check "a change records who made it" "$(field "$task" changed_by)" "$USER"
 
+claude "$task" modify state:fixed
+check "an assistant cannot skip doing" "$(field "$task" state)" open
+claude "$task" done
+check "an assistant cannot close an open task" "$(field "$task" state)" open
 claude "$task" modify state:doing
 claude "$task" annotate "added rubocop, commit 1a2b3c4"
 claude "$task" modify state:fixed
@@ -56,17 +62,22 @@ check "a second assistant reopens a fixed task" "$(field "$task" state)" open
 check "each assistant signs its comments" \
   "$(task "$task" export | python3 -c "import json,sys; print(' '.join(a['description'].split(']')[0] + ']' for a in json.load(sys.stdin)[0]['annotations']))")" \
   "[claude] [codex]"
+codex "$task" modify state:doing
 codex "$task" modify state:fixed
 codex "$task" done
 check "a verified task is done" "$(field "$task" state) $(field "$task" status)" "done completed"
 codex "$task" modify state:open
 check "a done task reopens" "$(field "$task" status) $(field "$task" end)" "pending "
+codex "$task" modify state:doing
+codex "$task" modify state:fixed
 codex "$task" modify state:done
 check "state done completes the task" "$(field "$task" status) $(field "$task" end | cut -c1-2)" "completed 20"
 
 codex add "a typo in the README" +bug state:open assignee:codex
 bug=$(task /typo/ _uuid)
-check "an assistant adds a bug in any state" "$(field "$bug" state)" open
+check "an assistant adds a bug as open" "$(field "$bug" state)" open
+codex add "a fixed typo" +bug state:fixed
+check "an assistant cannot add a bug past open" "$(task /fixed.typo/ count)" 0
 codex "$bug" annotate "cannot reproduce on main"
 codex "$bug" modify state:rejected
 check "rejected closes the task" "$(field "$bug" status) $(field "$bug" end | cut -c1-2)" "deleted 20"

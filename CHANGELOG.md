@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+## [0.6.0] — 2026-10-20
+
+- An assistant moves a task only along open → doing → fixed → done, and adds a `+bug` only as open. The human moves a task to any state.
+
 ## [0.5.0] — 2026-10-19
 
 - `squire init` installs a skill that reads the installed `SKILL.md`, so an upgrade reaches the assistant without another `init`.

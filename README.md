@@ -4,10 +4,10 @@ Frustrated with a 1.4 MB `TODO.md` whose longest line ran to 66 KB, I wrote squi
 
 ### What it adds to taskwarrior
 
-- **A flow.** `state` is `idea`, `open`, `doing`, `fixed`, `done`, `postponed` or `rejected`. Only you approve an idea; an assistant files a broken thing with an obvious remedy as a `+bug` and gets on with it.
-- **Assignee.** `assignee` says who acts next: you or an assistant.
-- **Hand-offs.** When an assistant needs you for a question, an approval, a manual test or a push to production, it comments what it needs and assigns the task to you. You answer in a comment and assign the task back.
-- **`task mine`.** The live, unblocked tasks assigned to you, most urgent first, each with what you are asked on top. For an assistant, it is the work queue.
+- **A flow.** `state` is `idea`, `open`, `doing`, `fixed`, `done`, `postponed` or `rejected`. Only the human approves an idea. An assistant files a discrepancy as a `+bug` and works it through `open → doing → fixed → done`; the hook refuses a skipped step.
+- **Assignee.** `assignee` says who acts next: the human or an assistant.
+- **Hand-offs.** When an assistant needs the human for a question, an approval, a manual test or a push to production, it comments what it needs and assigns the task to the human. The human answers in a comment and assigns the task back.
+- **`task mine`.** The live, unblocked tasks assigned to whoever runs it, most urgent first, each with the question on top. For an assistant, it is the work queue.
 - **`task board`.** Every live task on one line: UUID, state, assignee, priority, version, ref, title.
 - **Authors.** Every task, change and comment records who made it.
 - **Hygiene.** A title is at most 80 characters, a body 800, a comment 500, for everyone.
@@ -21,8 +21,8 @@ The flow comes from a project where assistants found and fixed about two thousan
 
 - Priorities survive when the assistant's context is cleared. They live in the database, not in its head.
 - No task disappears without a trace. In a markdown file, an edit can drop a row and nobody notices. Here a task ends only as `done` or `rejected`, and its history stays.
-- The assistant asks a question by assigning the task to you, and keeps working on something else.
-- New scope starts only when you approve it. A bug with an obvious remedy goes straight to work.
+- The assistant asks a question by assigning the task to the human, and keeps working on something else.
+- New scope starts only when the human approves it. A bug goes straight to work.
 - No task grows into an essay. Long text is refused at the door.
 
 ### Install
@@ -40,11 +40,11 @@ It prints `TASKRC` and `TASKDATA`: set them for the project directory with whate
 ```mermaid
 stateDiagram-v2
     direction TB
-    [*] --> idea: anyone adds new scope,<br/>assigned to you
-    [*] --> open: an assistant adds a +bug<br/>(broken, obvious remedy)
-    idea --> open: you approve
-    idea --> rejected: you reject
-    idea --> postponed: you postpone
+    [*] --> idea: anyone adds new scope,<br/>assigned to the human
+    [*] --> open: an assistant adds a +bug
+    idea --> open: the human approves
+    idea --> rejected: the human rejects
+    idea --> postponed: the human postpones
     open --> doing: the assignee starts
     doing --> fixed: the assignee fixes
     fixed --> done: a reviewer verifies
@@ -61,7 +61,7 @@ The human is `$USER`. An assistant sets `SQUIRE_AUTHOR` to its own name.
 
 ### Cheat sheet
 
-You:
+The human:
 
     task add "Add rubocop to the demos" state:open priority:H version:0.5 assignee:claude
     task mine
@@ -97,11 +97,11 @@ Tests: `make test`.
 
 ### Why not
 
-- **taskwarrior alone**: no flow and no limits. A comment has no author, so an assistant that uses your account writes as you.
+- **taskwarrior alone**: no flow and no limits. A comment has no author, so an assistant that uses the human's account writes as the human.
 - **[beads](https://github.com/gastownhall/beads)**: `bd init` wrote 19 files into the repository, among them other assistants' configs and five git hooks. It also tells your assistant to stop using its own memory.
 - **[Backlog.md](https://github.com/MrLesk/Backlog.md)**: markdown files again. We are escaping from those.
 - **[git-bug](https://github.com/git-bug/git-bug)**: open or closed, and nothing in between.
-- **GitHub Issues**: needs the network, and the assistant writes with your token, so everyone is you.
+- **GitHub Issues**: needs the network, and the assistant writes with the human's token, so every author is the human.
 - **Jira**: no.
 - **[DoltLite](https://www.dolthub.com/blog/2026-03-25-doltlite/)** as the storage, not yet: it is a SQLite with commits and merges, and TaskChampion's storage is pluggable. Two branches would then merge their tasks.
 

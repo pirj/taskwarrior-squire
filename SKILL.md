@@ -5,9 +5,10 @@ description: Use when the project keeps its work in taskwarrior-squire (TASKRC p
 
 # Working with one human through taskwarrior-squire
 
-The tasks are the shared memory between you and the human. Your context is
-cleared; the tasks are not. Everything you will need tomorrow goes into a task.
-The reference is `man taskwarrior-squire`. Read it before your first command.
+Two kinds of actor share the tasks: the human, and assistants like you. Your
+context is cleared; the tasks are not. Everything you will need tomorrow goes
+into a task. The reference is `man taskwarrior-squire`. Read it before your
+first command.
 
 ## Who is who
 
@@ -30,18 +31,25 @@ what you are asked on top. A comment from the human is an answer: act on it.
 
 | You find | You add |
 |---|---|
-| Something broken with an obvious remedy | `task add "<title>" +bug state:open assignee:$SQUIRE_AUTHOR` |
+| A discrepancy: something is broken | `task add "<title>" +bug state:open assignee:$SQUIRE_AUTHOR` |
 | New scope: a feature, a public promise, a trade-off | `task add "<title>" assignee:$USER` (an idea) |
 
-- Take a task: `task <uuid> modify state:doing`.
-- Finish it: comment what you did and the commit, then `state:fixed`.
-- Verify a fixed task, comment what you checked, then `task <uuid> done`.
-  A wrong fix goes back to `state:open` with a comment that says what failed.
+A bug stays a bug when its remedy needs the human's decision: add it as above,
+then ask on it (below).
+
+Work only on a task in state `open`. Each step is one command, in this order:
+
+1. Before the first change: `task <uuid> modify state:doing`.
+2. After the fix: comment what you did and the commit, then `state:fixed`.
+3. After verification: comment what you checked, then `task <uuid> done`.
+   A wrong fix goes back to `state:open` with a comment that says what failed.
+
 - A task you will not do (won't fix, cannot reproduce, not needed): comment
-  why, then `state:rejected`. Only the human rejects an idea.
+  why, then `state:rejected`.
 - Work that waits for something else: `depends:<uuid>`. Work for later:
   `state:postponed`.
-- Never move a task out of `idea`. The hook refuses it.
+- Never work on an idea, and never move a task out of `idea`. The hook refuses
+  the move; only the human decides on an idea.
 
 ## Asking the human
 
@@ -56,9 +64,10 @@ not a question: measure it and write it into the task.
 
 The same goes for what only the human may do: a push to production, a manual
 test, a script your permissions forbid, an approval. Say exactly what to run or
-check, and assign the task to them.
+check, and assign the task to the human.
 
-The answer comes back as the human's comment, on a task assigned to you again.
+The answer comes back as the human's comment, and the human assigns the task
+back to you.
 
 ## Hygiene
 

@@ -90,10 +90,15 @@ The limits bind everyone.
 Each new comment gets the prefix
 .Li [author] .
 .It
-Only the human moves a task out of idea, or rejects it.
+Only the human moves a task out of idea.
 An assistant adds an idea, or a task tagged
 .Cm +bug
-in any state.
+in state open.
+.It
+An assistant moves a task only along the flow:
+open to doing, doing to fixed, fixed to done.
+It may send a task back to open, postpone it, or reject it.
+The human moves a task to any state.
 .El
 .Ss Commands
 .Bl -tag -width board

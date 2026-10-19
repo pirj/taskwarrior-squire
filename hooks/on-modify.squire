@@ -14,6 +14,17 @@ BODY_MAX = 800
 COMMENT_MAX = 500
 STATE_OF_STATUS = {"completed": "done", "deleted": "rejected"}
 STATUS_OF_STATE = {state: status for status, state in STATE_OF_STATUS.items()}
+# The moves an assistant may make. The human moves a task anywhere.
+ASSISTANT_MOVES = {
+    "idea": set(),
+    "open": {"doing", "postponed", "rejected"},
+    "doing": {"fixed", "open", "postponed", "rejected"},
+    "fixed": {"done", "open", "postponed", "rejected"},
+    "done": {"open"},
+    "postponed": {"open", "rejected"},
+    "rejected": set(),
+}
+FLOW = "open → doing → fixed → done"
 
 actor = os.environ.get("SQUIRE_AUTHOR") or os.environ["USER"]
 human = actor == os.environ["USER"]
@@ -50,11 +61,13 @@ for annotation in new.get("annotations", []):
     check_length("comment", annotation["description"], COMMENT_MAX)
     annotation["description"] = f"[{actor}] {annotation['description']}"
 
-if not human and new.get("state", "idea") != "idea":
-    if not old and "bug" not in new.get("tags", []):
-        refuse(f"{actor} may add an idea, or a +bug in any state; a human approves the rest")
-    if old and old.get("state", "idea") == "idea":
-        refuse(f"only a human decides on an idea; {actor} may not move it to {new['state']}")
+state, was = new.get("state", "idea"), old.get("state", "idea")
+if not human and not old and state != "idea" and not ("bug" in new.get("tags", []) and state == "open"):
+    refuse(f"{actor} may add an idea, or a +bug as open; the human approves the rest")
+if not human and old and state != was and state not in ASSISTANT_MOVES[was]:
+    if was == "idea":
+        refuse(f"only the human decides on an idea; {actor} may not move it to {state}")
+    refuse(f"{actor} may not move a task from {was} to {state}; the flow is {FLOW}")
 
 if not old:
     new["author"] = actor
