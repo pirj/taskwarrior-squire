@@ -20,6 +20,7 @@ Everything else (dependencies, priorities, tags, urgency, search, history, undo)
 The flow comes from a project where assistants found and fixed about two thousand discrepancies, and asked the human only about the rest. It outgrew the markdown files it started in.
 
 - Priorities survive when the assistant's context is cleared. They live in the database, not in its head.
+- No task disappears without a trace. In a markdown file, an edit can drop a row and nobody notices. Here a task ends only as `done` or `rejected`, and its history stays.
 - The assistant asks a question by assigning the task to you, and keeps working on something else.
 - New scope starts only when you approve it. A bug with an obvious remedy goes straight to work.
 - No task grows into an essay. Long text is refused at the door.
