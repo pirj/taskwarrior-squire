@@ -43,16 +43,18 @@ stateDiagram-v2
     [*] --> open: an assistant adds a +bug<br/>(broken, obvious remedy)
     idea --> open: you approve
     idea --> rejected: you reject
+    idea --> postponed: you postpone
     open --> doing: the assignee starts
     doing --> fixed: the assignee fixes
     fixed --> done: a reviewer verifies
     fixed --> open: a reviewer finds a fault
     open --> postponed: postpone
+    doing --> postponed: postpone
     postponed --> open: resume
     open --> rejected: won't fix, cannot reproduce,<br/>not needed
 ```
 
-Any task can be `postponed` or `rejected`, from any state. `done` and `rejected` close the task; another state opens it again.
+`done` and `rejected` close the task; another state opens it again.
 
 The human is `$USER`. An assistant sets `SQUIRE_AUTHOR` to its own name.
 
