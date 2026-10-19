@@ -36,8 +36,11 @@ exists, it also writes them with
 .Ev SQUIRE_AUTHOR Ns =claude
 into
 .Pa .claude/settings.json
-and copies the assistant skill into
-.Pa .claude/skills/taskwarrior-squire/ .
+and writes into
+.Pa .claude/skills/taskwarrior-squire/
+a skill that reads the installed
+.Pa SKILL.md ,
+so an upgrade reaches the assistant.
 The taskrc includes
 .Pa ~/.taskrc
 first, so your own settings apply.

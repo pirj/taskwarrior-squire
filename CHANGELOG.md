@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+## [0.5.0] — 2026-10-19
+
+- `squire init` installs a skill that reads the installed `SKILL.md`, so an upgrade reaches the assistant without another `init`.
+
 ## [0.4.0] — 2026-10-19
 
 - `task board`: every live task on one line, with state, assignee, priority, version and ref.

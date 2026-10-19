@@ -33,34 +33,33 @@ Then, in the project:
 
     squire init
 
-It prints `TASKRC` and `TASKDATA`: set them for the project directory with whatever sets your per-directory environment (mise, direnv, …). For Claude Code it also writes the env into `.claude/settings.json` and copies the skill into `.claude/skills/`. Your `~/.taskrc` still applies; the squire taskrc includes it. The database, `taskchampion.sqlite3`, appears in the `TASKDATA` directory on first use.
+It prints `TASKRC` and `TASKDATA`: set them for the project directory with whatever sets your per-directory environment (mise, direnv, …). For Claude Code it also writes the env into `.claude/settings.json` and, in `.claude/skills/`, a skill that reads the installed one, so upgrades reach the assistant. Your `~/.taskrc` still applies; the squire taskrc includes it. The database, `taskchampion.sqlite3`, appears in the `TASKDATA` directory on first use.
 
 ### Flow
 
 ```mermaid
 stateDiagram-v2
-    direction LR
-    [*] --> idea: anyone adds
-    [*] --> open: assistant adds a +bug
-    idea --> open: human approves
-    open --> doing: assignee starts
-    doing --> fixed: assignee fixes
-    fixed --> done: reviewer verifies
-    fixed --> open: reviewer finds a fault
+    direction TB
+    [*] --> idea: anyone adds new scope,<br/>assigned to you
+    [*] --> open: an assistant adds a +bug<br/>(broken, obvious remedy)
+    idea --> open: you approve
+    idea --> rejected: you reject
+    open --> doing: the assignee starts
+    doing --> fixed: the assignee fixes
+    fixed --> done: a reviewer verifies: task done<br/>(an assistant, or your manual test)
+    fixed --> open: a reviewer finds a fault
+    open --> postponed: postpone
+    postponed --> open: resume
+    open --> rejected: won't fix, cannot reproduce,<br/>not needed: task delete
+    note left of open
+        In any state, a question, an approval
+        or a manual test goes to you:
+        assignee is you, your comment answers.
+        depends: blocks a task until another is done.
+    end note
 ```
 
-Any task can be `postponed` or `rejected`. Only the human approves or rejects an idea. `done` and `rejected` close the task: `task <uuid> done` and `task <uuid> delete` do the same.
-
-| Situation | state | assignee |
-|---|---|---|
-| New scope, waits for you | `idea` | you |
-| Broken, obvious remedy | `open`, tagged `+bug` | assistant |
-| A question or a request to you | unchanged | you; the answer goes in a comment |
-| Work | `open` → `doing` | assistant |
-| Verification, or your manual test | `fixed` | assistant, or you |
-| Verified | `done` | — |
-| Won't fix, cannot reproduce, not needed | `rejected` | — |
-| Blocked | follows from `depends:` | — |
+Any task can be `postponed` or `rejected`, from any state. `done` and `rejected` close the task; another state opens it again.
 
 The human is `$USER`. An assistant sets `SQUIRE_AUTHOR` to its own name.
 

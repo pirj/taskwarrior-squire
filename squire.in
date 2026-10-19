@@ -3,17 +3,21 @@
 
 It prints TASKRC and TASKDATA for you to set in this directory, with whatever
 sets your per-directory environment. When .claude/ exists, it writes them for
-Claude Code too: the env in .claude/settings.json and the skill in
-.claude/skills/. taskwarrior creates the
-database on first use. Everything after that is `task`: man taskwarrior-squire.
+Claude Code too: the env in .claude/settings.json, and in .claude/skills/ a
+skill that reads the installed SKILL.md, so it follows upgrades. taskwarrior
+creates the database on first use. Everything after that is `task`: man taskwarrior-squire.
 """
 import json
 import os
-import shutil
 import sys
 
 SHARE = "@SHARE@"
 TASKRC = f"{SHARE}/taskrc"
+STUB = """The instructions come with the installed taskwarrior-squire, so they match
+its version. Read them before your first `task` command:
+
+    cat "$(dirname "$TASKRC")/SKILL.md"
+"""
 project = os.getcwd()
 
 if sys.argv[1:] != ["init"]:
@@ -42,7 +46,9 @@ if os.path.isdir(".claude"):
         json.dump(settings, f, indent=2)
         f.write("\n")
     os.makedirs(".claude/skills/taskwarrior-squire", exist_ok=True)
-    shutil.copy(f"{SHARE}/SKILL.md", ".claude/skills/taskwarrior-squire/SKILL.md")
+    frontmatter = open(f"{SHARE}/SKILL.md").read().split("---\n")[1]
+    with open(".claude/skills/taskwarrior-squire/SKILL.md", "w") as f:
+        f.write(f"---\n{frontmatter}---\n\n{STUB}")
     say(f"Claude Code: env in {path} (SQUIRE_AUTHOR={env['SQUIRE_AUTHOR']}), "
         "skill in .claude/skills/taskwarrior-squire/")
 else:

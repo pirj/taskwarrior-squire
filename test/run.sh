@@ -21,7 +21,9 @@ human() { task "$@" >/dev/null 2>&1; }
 squire init >/dev/null
 check "init writes the assistant's env" \
   "$(python3 -c "import json; e=json.load(open('.claude/settings.json'))['env']; import os; print(e['SQUIRE_AUTHOR'], os.path.samefile(e['TASKDATA'], '.'))")" "claude True"
-check "init copies the skill" "$(head -2 .claude/skills/taskwarrior-squire/SKILL.md | tail -1)" "name: taskwarrior-squire"
+check "init installs the skill" "$(head -2 .claude/skills/taskwarrior-squire/SKILL.md | tail -1)" "name: taskwarrior-squire"
+check "the skill reads the installed instructions" \
+  "$(TASKRC="$project/prefix/share/taskwarrior-squire/taskrc" sh -c "$(grep '^    cat' .claude/skills/taskwarrior-squire/SKILL.md)" | grep -c '^## The flow$')" 1
 check "init leaves a ~/.taskrc for the include" "$(test -f "$HOME/.taskrc" && echo yes)" yes
 export TASKRC="$project/prefix/share/taskwarrior-squire/taskrc" TASKDATA="$PWD"
 echo "search.case.sensitive=no" >> "$HOME/.taskrc"
