@@ -1,13 +1,12 @@
 ## taskwarrior-squire
 
-Frustrated with a 1.4 MB `TODO.md` whose longest line ran to 66 KB, and failing to resist the urge, built a new tool: `taskwarrior-squire`, a task tracker for one human and the AI assistants who work for them.
-
-It is [taskwarrior](https://taskwarrior.org) carrying a working agreement between you and your assistants, and a hook that enforces it. Every warrior needs a squire.
+Frustrated with a 1.4 MB `TODO.md` whose longest line ran to 66 KB, I wrote squire, a [taskwarrior](https://taskwarrior.org) extension, so that one human and their AI assistants work from one task list: the assistants pick work and ask questions there, and new scope waits for the human.
 
 ### What it adds to taskwarrior
 
 - **A flow.** `state` is `idea`, `open`, `doing`, `fixed`, `done`, `postponed` or `rejected`. Only you approve an idea; an assistant files a broken thing with an obvious remedy as a `+bug` and gets on with it.
-- **Hand-offs.** `assignee` says who acts next. A question, an approval, a manual test, a push to production: the assistant assigns the task to you and says what it needs. You answer in a comment and assign the task back.
+- **Assignee.** `assignee` says who acts next: you or an assistant.
+- **Hand-offs.** When an assistant needs you for a question, an approval, a manual test or a push to production, it comments what it needs and assigns the task to you. You answer in a comment and assign the task back.
 - **`task mine`.** The live, unblocked tasks assigned to you, most urgent first, each with what you are asked on top. For an assistant, it is the work queue.
 - **`task board`.** Every live task on one line: UUID, state, assignee, priority, version, ref, title.
 - **Authors.** Every task, change and comment records who made it.
@@ -46,17 +45,11 @@ stateDiagram-v2
     idea --> rejected: you reject
     open --> doing: the assignee starts
     doing --> fixed: the assignee fixes
-    fixed --> done: a reviewer verifies: task done<br/>(an assistant, or your manual test)
+    fixed --> done: a reviewer verifies
     fixed --> open: a reviewer finds a fault
     open --> postponed: postpone
     postponed --> open: resume
-    open --> rejected: won't fix, cannot reproduce,<br/>not needed: task delete
-    note left of open
-        In any state, a question, an approval
-        or a manual test goes to you:
-        assignee is you, your comment answers.
-        depends: blocks a task until another is done.
-    end note
+    open --> rejected: won't fix, cannot reproduce,<br/>not needed
 ```
 
 Any task can be `postponed` or `rejected`, from any state. `done` and `rejected` close the task; another state opens it again.
@@ -109,6 +102,6 @@ Tests: `make test`.
 - **Jira**: no.
 - **[DoltLite](https://www.dolthub.com/blog/2026-03-25-doltlite/)** as the storage, not yet: it is a SQLite with commits and merges, and TaskChampion's storage is pluggable. Two branches would then merge their tasks.
 
-## License
+### License
 
-taskwarrior-squire is released under the [MIT License](https://opensource.org/licenses/MIT).
+taskwarrior-squire is written by Phil Pirozhkov and released under the [MIT License](https://opensource.org/licenses/MIT).
