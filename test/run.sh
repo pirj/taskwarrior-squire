@@ -34,7 +34,7 @@ export TASKRC="$project/prefix/share/taskwarrior-squire/taskrc" TASKDATA="$PWD"
 echo "search.case.sensitive=no" >> "$HOME/.taskrc"
 check "the human's own taskrc still applies" "$(task _get rc.search.case.sensitive)" no
 
-claude add "add rubocop" assignee:claude priority:H
+claude add "add rubocop" assignee:claude priority:H "body:DONE WHEN: bin/lint runs rubocop"
 task=$(task 1 _uuid)
 check "a new task is an idea" "$(field "$task" state)" idea
 check "the author is recorded" "$(field "$task" author)" claude
@@ -48,6 +48,14 @@ claude add "skip the approval" state:open
 check "an assistant cannot add an approved task" "$(task count)" 1
 claude "$task" modify state:doing
 check "an assistant cannot work on an idea" "$(field "$task" state)" idea
+human add "a vague wish"
+vague=$(task /vague/ _uuid)
+human "$vague" modify state:open
+check "an idea without a definition of done stays an idea" "$(field "$vague" state)" idea
+human "$vague" annotate "done when: the wish is granted"
+human "$vague" modify state:open
+check "a comment can hold the definition of done" "$(field "$vague" state)" open
+human "$vague" modify state:postponed
 human "$task" modify state:open
 check "the human approves an idea" "$(field "$task" state)" open
 check "a change records who made it" "$(field "$task" changed_by)" "$USER"
@@ -79,6 +87,8 @@ codex "$task" modify state:done
 check "state done completes the task" "$(field "$task" status) $(field "$task" end | cut -c1-2)" "completed 20"
 
 codex add "a typo in the README" +bug state:open assignee:codex
+check "a bug needs a definition of done" "$(task /typo/ count)" 0
+codex add "a typo in the README" +bug state:open assignee:codex "body:DONE WHEN: the README spells it right"
 bug=$(task /typo/ _uuid)
 check "an assistant adds a bug as open" "$(field "$bug" state)" open
 codex add "a fixed typo" +bug state:fixed
@@ -86,7 +96,7 @@ check "an assistant cannot add a bug past open" "$(task /fixed.typo/ count)" 0
 codex "$bug" annotate "cannot reproduce on main"
 codex "$bug" modify state:rejected
 check "rejected closes the task" "$(field "$bug" status) $(field "$bug" end | cut -c1-2)" "deleted 20"
-claude add "flaky spec" +bug state:open assignee:claude
+claude add "flaky spec" +bug state:open assignee:claude "body:DONE WHEN: 100 runs pass"
 flaky=$(task /flaky/ _uuid)
 claude "$flaky" delete
 check "a deleted task is rejected" "$(field "$flaky" state)" rejected
@@ -113,7 +123,7 @@ claude add "run them on the specs too" assignee:"$USER"
 question=$(task /specs/ _uuid)
 claude "$question" annotate "on the specs as well?"
 claude add "later" assignee:"$USER" depends:"$asked"
-codex add "codex's own work" +bug state:open assignee:codex
+codex add "codex's own work" +bug state:open assignee:codex "body:DONE WHEN: it works"
 human "$mine" modify state:postponed
 list=$(task mine)
 check "mine lists the human's live, unblocked tasks" "$(echo "$list" | grep -c '^## ')" 2
@@ -121,7 +131,7 @@ check "mine shows the newest question" "$(echo "$list" | grep -c '^\[claude\] on
 check "mine shows the body when nobody asked" "$(echo "$list" | grep -c '^all, or enabled only?$')" 1
 check "each assistant sees only its own work" "$(SQUIRE_AUTHOR=codex task mine | grep -c '^## ')" 1
 check "mine shows the tags" "$(SQUIRE_AUTHOR=codex task mine | grep -c '^open · +bug$')" 1
-claude add "a long title that wraps when the terminal is eighty columns wide" +bug state:open
+claude add "a long title that wraps when the terminal is eighty columns wide" +bug state:open "body:DONE WHEN: it fits"
 check "board shows one line per live task" "$(task board | wc -l | tr -d ' ')" "$(task status:pending count)"
 
 [ "$failures" -eq 0 ]

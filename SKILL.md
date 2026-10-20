@@ -31,8 +31,12 @@ what you are asked on top. A comment from the human is an answer: act on it.
 
 | You find | You add |
 |---|---|
-| A discrepancy: something is broken | `task add "<title>" +bug state:open assignee:$SQUIRE_AUTHOR` |
-| New scope: a feature, a public promise, a trade-off | `task add "<title>" assignee:$USER` (an idea) |
+| A discrepancy: something is broken | `task add "<title>" +bug state:open assignee:$SQUIRE_AUTHOR "body:<what is wrong> DONE WHEN: <what shows it is fixed>"` |
+| New scope: a feature, a public promise, a trade-off | `task add "<title>" assignee:$USER "body:<what and why> DONE WHEN: <what shows it is done>"` (an idea) |
+
+Every task says how to check it: `DONE WHEN:` in its body or a comment. The
+hook refuses `open` and `doing` without it. To add it to an older task:
+`task <uuid> annotate "DONE WHEN: <what shows it is done>"`. Verify against it.
 
 A bug stays a bug when its remedy needs the human's decision: add it as above,
 then ask on it (below).

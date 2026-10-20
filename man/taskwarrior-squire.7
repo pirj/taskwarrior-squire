@@ -96,6 +96,10 @@ A number goes in a field, such as
 Each new comment gets the prefix
 .Li [author] .
 .It
+A task in open or doing has its definition of done:
+.Li DONE WHEN:
+in its body or a comment.
+.It
 Only the human moves a task out of idea.
 An assistant adds an idea, or a task tagged
 .Cm +bug
@@ -123,12 +127,13 @@ and title, most urgent first.
 .Bl -tag -width Ds
 .It Add new scope (anyone):
 .Bd -literal -compact
-task add "<title>" assignee:$USER
+task add "<title>" assignee:$USER "body:<what> DONE WHEN: <check>"
 .Ed
 The task is an idea.
 .It Add a bug (an assistant):
 .Bd -literal -compact
-task add "<title>" +bug state:open assignee:<name>
+task add "<title>" +bug state:open assignee:<name> \e
+  "body:<what is wrong> DONE WHEN: <check>"
 .Ed
 .It Approve an idea (the human):
 .Bd -literal -compact
@@ -201,7 +206,8 @@ how an assistant works with the human through these tasks
 .El
 .Sh EXAMPLES
 .Bd -literal -offset indent
-SQUIRE_AUTHOR=claude task add "Add rubocop to the demos" assignee:pirj
+SQUIRE_AUTHOR=claude task add "Add rubocop to the demos" assignee:pirj \e
+  "body:DONE WHEN: bin/lint runs rubocop on every demo"
 task 469e1a60 modify state:open assignee:claude
 SQUIRE_AUTHOR=claude task 469e1a60 annotate "Which cops?"
 task mine

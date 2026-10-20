@@ -25,6 +25,7 @@ ASSISTANT_MOVES = {
     "rejected": set(),
 }
 FLOW = "open → doing → fixed → done"
+DONE_WHEN = "DONE WHEN:"
 
 actor = os.environ.get("SQUIRE_AUTHOR") or os.environ["USER"]
 human = actor == os.environ["USER"]
@@ -73,6 +74,10 @@ if not human and old and state != was and state not in ASSISTANT_MOVES[was]:
     if was == "idea":
         refuse(f"only the human decides on an idea; {actor} may not move it to {state}")
     refuse(f"{actor} may not move a task from {was} to {state}; the flow is {FLOW}")
+texts = [new.get("body", "")] + [a["description"] for a in new.get("annotations", [])]
+if state in ("open", "doing") and state != was and not any(DONE_WHEN in text.upper() for text in texts):
+    refuse(f"a task needs its definition of done before it is {state}: "
+           f"add '{DONE_WHEN} <what shows it is done>' to its body or a comment")
 
 if not old:
     new["author"] = actor

@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+## [0.11.0] — 2026-10-21
+
+- A task needs `DONE WHEN:` in its body or a comment before it is open or doing.
+
 ## [0.10.0] — 2026-10-21
 
 - `squire init` adds a hook that gives every Claude Code session and subagent the installed skill at its start.

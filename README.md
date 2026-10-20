@@ -5,6 +5,7 @@ Frustrated with a 1.4 MB `TODO.md` whose longest line ran to 66 KB, I wrote squi
 ### What it adds to taskwarrior
 
 - **A flow.** `state` is `idea`, `open`, `doing`, `fixed`, `done`, `postponed` or `rejected`. Only the human approves an idea. An assistant files a discrepancy as a `+bug` and works it through `open → doing → fixed → done`; the hook refuses a skipped step.
+- **A definition of done.** A task in `open` or `doing` says `DONE WHEN:` in its body or a comment, so whoever verifies it knows what to check.
 - **Assignee.** `assignee` says who acts next: the human or an assistant.
 - **Hand-offs.** When an assistant needs the human for a question, an approval, a manual test or a push to production, it comments what it needs and assigns the task to the human. The human answers in a comment and assigns the task back.
 - **`task mine`.** The live, unblocked tasks assigned to whoever runs it, most urgent first, each with the question on top. For an assistant, it is the work queue.
@@ -63,7 +64,7 @@ The human is `$USER`. An assistant sets `SQUIRE_AUTHOR` to its own name.
 
 The human:
 
-    task add "Add rubocop to the demos" state:open priority:H version:0.5 assignee:claude
+    task add "Add rubocop to the demos" state:open priority:H version:0.5 assignee:claude "body:DONE WHEN: bin/lint runs rubocop on every demo"
     task mine
     task 9c1e0f2a annotate "B: only the default cops" && task 9c1e0f2a modify assignee:claude
     task 77ab31d0 modify state:open
