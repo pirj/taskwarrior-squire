@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+## [0.8.0] — 2026-10-20
+
+- `task mine` shows the tags of each task.
+
 ## [0.7.0] — 2026-10-20
 
 - `taskwarrior-squire(7)` lists the command for every move in the flow, the question and the answer included.

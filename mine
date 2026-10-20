@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """task mine: the live tasks assigned to $SQUIRE_AUTHOR (else $USER), most urgent first.
 
-A section shows the state, priority, version and ref of the task, and what
+A section shows the state, priority, version, ref and tags of the task, and what
 the assignee is asked: the newest comment by someone else, else the body.
 Arguments narrow the filter.
 """
@@ -26,7 +26,8 @@ for t in sorted(tasks, key=lambda t: -t["urgency"]):
     request = next((a["description"] for a in reversed(t.get("annotations", []))
                     if author_of(a) != actor), t.get("body"))
     print(f"## {t['uuid'][:8]} — {t['description']}\n")
-    print(" · ".join(filter(None, (t.get("state"), t.get("priority"), t.get("version"), t.get("ref")))))
+    tags = " ".join(f"+{tag}" for tag in t.get("tags", []))
+    print(" · ".join(filter(None, (t.get("state"), t.get("priority"), t.get("version"), t.get("ref"), tags))))
     if request:
         print(f"\n{request}")
     print()
