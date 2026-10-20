@@ -3,8 +3,9 @@
 
 It prints TASKRC and TASKDATA for you to set in this directory, with whatever
 sets your per-directory environment. When .claude/ exists, it writes them for
-Claude Code too: the env in .claude/settings.json, and in .claude/skills/ a
-skill that reads the installed SKILL.md, so it follows upgrades. taskwarrior
+Claude Code too: the env in .claude/settings.json, a hook that puts the
+installed SKILL.md into every session and subagent, and in .claude/skills/ a
+skill that reads it, so both follow upgrades. taskwarrior
 creates the database on first use. Everything after that is `task`: man taskwarrior-squire.
 """
 import json
@@ -18,6 +19,9 @@ its version. Read them before your first `task` command:
 
     cat "$(dirname "$TASKRC")/SKILL.md"
 """
+HOOK = ("python3 -c 'import json, sys; event = json.load(sys.stdin)[\"hook_event_name\"]; "
+        f"text = open(\"{SHARE}/SKILL.md\").read().split(\"---\\n\", 2)[2]; "
+        "print(json.dumps({\"hookSpecificOutput\": {\"hookEventName\": event, \"additionalContext\": text}}))'")
 project = os.getcwd()
 
 if sys.argv[1:] != ["init"]:
@@ -42,6 +46,10 @@ if os.path.isdir(".claude"):
     env = settings.setdefault("env", {})
     env.setdefault("SQUIRE_AUTHOR", "claude")
     env.update(TASKRC=TASKRC, TASKDATA=project)
+    hooks = settings.setdefault("hooks", {})
+    for event in ("SessionStart", "SubagentStart"):
+        groups = [g for g in hooks.get(event, []) if HOOK not in (h.get("command") for h in g["hooks"])]
+        hooks[event] = groups + [{"hooks": [{"type": "command", "command": HOOK}]}]
     with open(path, "w") as f:
         json.dump(settings, f, indent=2)
         f.write("\n")
@@ -49,7 +57,7 @@ if os.path.isdir(".claude"):
     frontmatter = open(f"{SHARE}/SKILL.md").read().split("---\n")[1]
     with open(".claude/skills/taskwarrior-squire/SKILL.md", "w") as f:
         f.write(f"---\n{frontmatter}---\n\n{STUB}")
-    say(f"Claude Code: env in {path} (SQUIRE_AUTHOR={env['SQUIRE_AUTHOR']}), "
+    say(f"Claude Code: env and hooks in {path} (SQUIRE_AUTHOR={env['SQUIRE_AUTHOR']}), "
         "skill in .claude/skills/taskwarrior-squire/")
 else:
     say("another assistant: give it TASKRC, TASKDATA and SQUIRE_AUTHOR=<its name>, "

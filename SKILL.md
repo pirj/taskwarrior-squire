@@ -67,8 +67,9 @@ not a question: measure it and write it into the task.
 3. Continue with other work. Do not guess the answer. Do not ask in chat.
 
 The same goes for what only the human may do: a push to production, a manual
-test, a script your permissions forbid, an approval. Say exactly what to run or
-check, and assign the task to the human.
+test, a script your permissions forbid, an approval. Ask on the task the work
+belongs to; do not add a task for it. Say exactly what to run or check, and
+assign the task to the human.
 
 The human answers with `task <uuid> annotate "<the answer>"` and assigns the
 task back to you; on an idea, that `modify` also sets `state:open`, `rejected` or

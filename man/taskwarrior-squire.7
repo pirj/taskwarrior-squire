@@ -35,8 +35,10 @@ When
 exists, it also writes them with
 .Ev SQUIRE_AUTHOR Ns =claude
 into
-.Pa .claude/settings.json
-and writes into
+.Pa .claude/settings.json ,
+with a hook that puts the installed
+.Pa SKILL.md
+into every session and subagent at its start, and writes into
 .Pa .claude/skills/taskwarrior-squire/
 a skill that reads the installed
 .Pa SKILL.md ,

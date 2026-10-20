@@ -33,7 +33,7 @@ Then, in the project:
 
     squire init
 
-It prints `TASKRC` and `TASKDATA`: set them for the project directory with whatever sets your per-directory environment (mise, direnv, …). For Claude Code it also writes the env into `.claude/settings.json` and, in `.claude/skills/`, a skill that reads the installed one, so upgrades reach the assistant. Your `~/.taskrc` still applies; the squire taskrc includes it. The database, `taskchampion.sqlite3`, appears in the `TASKDATA` directory on first use.
+It prints `TASKRC` and `TASKDATA`: set them for the project directory with whatever sets your per-directory environment (mise, direnv, …). For Claude Code it also writes into `.claude/settings.json` the env and a hook that gives every session and subagent the installed skill at its start, and, in `.claude/skills/`, a skill that reads the installed one, so upgrades reach the assistant. Your `~/.taskrc` still applies; the squire taskrc includes it. The database, `taskchampion.sqlite3`, appears in the `TASKDATA` directory on first use.
 
 ### Flow
 

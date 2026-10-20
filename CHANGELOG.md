@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+## [0.10.0] — 2026-10-21
+
+- `squire init` adds a hook that gives every Claude Code session and subagent the installed skill at its start.
+- The skill says: ask for a step only the human may do on the task the work belongs to.
+
 ## [0.9.0] — 2026-10-21
 
 - The hook refuses a tag that does not start with a letter: taskwarrior reads `+0.6` and `-0.6` as text.

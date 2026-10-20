@@ -24,6 +24,11 @@ check "init writes the assistant's env" \
 check "init installs the skill" "$(head -2 .claude/skills/taskwarrior-squire/SKILL.md | tail -1)" "name: taskwarrior-squire"
 check "the skill reads the installed instructions" \
   "$(TASKRC="$project/prefix/share/taskwarrior-squire/taskrc" sh -c "$(grep '^    cat' .claude/skills/taskwarrior-squire/SKILL.md)" | grep -c '^## The flow$')" 1
+squire init >/dev/null
+hook() { python3 -c "import json; print(json.load(open('.claude/settings.json'))['hooks']['$1'][0]['hooks'][0]['command'])"; }
+check "init adds its hooks once" "$(python3 -c "import json; h=json.load(open('.claude/settings.json'))['hooks']; print(len(h['SessionStart']), len(h['SubagentStart']))")" "1 1"
+check "a subagent starts with the instructions" \
+  "$(echo '{"hook_event_name": "SubagentStart"}' | sh -c "$(hook SubagentStart)" | python3 -c "import json,sys; o=json.load(sys.stdin)['hookSpecificOutput']; print(o['hookEventName'], '## The flow' in o['additionalContext'])")" "SubagentStart True"
 check "init leaves a ~/.taskrc for the include" "$(test -f "$HOME/.taskrc" && echo yes)" yes
 export TASKRC="$project/prefix/share/taskwarrior-squire/taskrc" TASKDATA="$PWD"
 echo "search.case.sensitive=no" >> "$HOME/.taskrc"
