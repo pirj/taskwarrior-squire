@@ -54,6 +54,11 @@ for field, limit in (("description", TITLE_MAX), ("body", BODY_MAX)):
     if new.get(field, "") != old.get(field, ""):
         check_length(field, new.get(field, ""), limit)
 
+for tag in set(new.get("tags", [])) - set(old.get("tags", [])):
+    if not tag[0].isalpha():
+        refuse(f"tag {tag} does not start with a letter, and taskwarrior reads +{tag} and -{tag} "
+               f"as text; put a number in a field, such as version:{tag}")
+
 known = {(a["entry"], a["description"]) for a in old.get("annotations", [])}
 for annotation in new.get("annotations", []):
     if (annotation["entry"], annotation["description"]) in known:

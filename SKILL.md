@@ -79,6 +79,8 @@ Act on it.
 
 - A title is at most 80 characters, a body 800, a comment 500. The hook refuses
   more.
+- A tag starts with a letter. A number goes in a field: `version:0.6`,
+  never `+0.6`.
 - To change a body, write the full new text to a file, then
   `task <uuid> modify "body:$(cat <file>)"`. The text arrives byte for byte.
 - `export` is a command, not a report: `task +tag export`, never

@@ -93,6 +93,8 @@ human "$mine" annotate "$long"
 check "the limits bind the human too" "$(comments "$mine")" 0
 claude "$mine" annotate "$long"
 check "the limits bind an assistant" "$(comments "$mine")" 0
+human "$mine" modify tags:0.6
+check "a tag starts with a letter" "$(field "$mine" tags)" ""
 human "$mine" modify "body:first line
 second line"
 check "the body keeps line breaks" "$(field "$mine" body)" "first line

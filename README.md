@@ -10,7 +10,7 @@ Frustrated with a 1.4 MB `TODO.md` whose longest line ran to 66 KB, I wrote squi
 - **`task mine`.** The live, unblocked tasks assigned to whoever runs it, most urgent first, each with the question on top. For an assistant, it is the work queue.
 - **`task board`.** Every live task on one line: UUID, state, assignee, priority, version, ref, title.
 - **Authors.** Every task, change and comment records who made it.
-- **Hygiene.** A title is at most 80 characters, a body 800, a comment 500, for everyone.
+- **Hygiene.** A title is at most 80 characters, a body 800, a comment 500, for everyone. A tag starts with a letter.
 - **A skill** that teaches an assistant all of the above.
 
 Everything else (dependencies, priorities, tags, urgency, search, history, undo) is plain taskwarrior.

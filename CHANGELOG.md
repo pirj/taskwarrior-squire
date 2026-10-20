@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+## [0.9.0] — 2026-10-21
+
+- The hook refuses a tag that does not start with a letter: taskwarrior reads `+0.6` and `-0.6` as text.
+
 ## [0.8.0] — 2026-10-20
 
 - `task mine` shows the tags of each task.
