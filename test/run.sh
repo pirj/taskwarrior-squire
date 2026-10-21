@@ -103,7 +103,7 @@ check "a deleted task is rejected" "$(field "$flaky" state)" rejected
 
 long=$(python3 -c "print('x' * 501)")
 human add "long comments" assignee:"$USER"
-mine=$(task status:pending _uuid | head -1)
+mine=$(task /long.comments/ _uuid)
 human "$mine" annotate "$long"
 check "the limits bind the human too" "$(comments "$mine")" 0
 claude "$mine" annotate "$long"
@@ -133,5 +133,12 @@ check "each assistant sees only its own work" "$(SQUIRE_AUTHOR=codex task mine |
 check "mine shows the tags" "$(SQUIRE_AUTHOR=codex task mine | grep -c '^open · +bug$')" 1
 claude add "a long title that wraps when the terminal is eighty columns wide" +bug state:open "body:DONE WHEN: it fits"
 check "board shows one line per live task" "$(task board | wc -l | tr -d ' ')" "$(task status:pending count)"
+
+human rc.recurrence=off add "monthly scan" recur:monthly due:tomorrow state:open assignee:claude "body:DONE WHEN: the scan is filed"
+SQUIRE_AUTHOR=claude task list >/dev/null 2>&1
+check "an assistant's command adds the instance" "$?" 0
+check "a recurring task stays a template" "$(task export | python3 -c "import json,sys; print(sum(t['status'] == 'recurring' for t in json.load(sys.stdin)))")" 1
+check "the instance keeps the template's author" \
+  "$(task status:pending /monthly/ export | python3 -c "import json,sys; t=json.load(sys.stdin)[0]; print(t['state'], t['author'], 'parent' in t)")" "open $USER True"
 
 [ "$failures" -eq 0 ]

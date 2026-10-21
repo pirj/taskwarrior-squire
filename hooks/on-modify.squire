@@ -49,7 +49,10 @@ new = json.loads(lines[-1])
 if new.get("status") != old.get("status") and new.get("status") in STATE_OF_STATUS:
     new["state"] = STATE_OF_STATUS[new["status"]]
 elif new.get("state") != old.get("state"):
-    new["status"] = STATUS_OF_STATE.get(new.get("state"), "pending")
+    if new.get("state") in STATUS_OF_STATE:
+        new["status"] = STATUS_OF_STATE[new["state"]]
+    elif new.get("status") != "recurring":
+        new["status"] = "pending"
 
 for field, limit in (("description", TITLE_MAX), ("body", BODY_MAX)):
     if new.get(field, "") != old.get(field, ""):
@@ -68,7 +71,8 @@ for annotation in new.get("annotations", []):
     annotation["description"] = f"[{actor}] {annotation['description']}"
 
 state, was = new.get("state", "idea"), old.get("state", "idea")
-if not human and not old and state != "idea" and not ("bug" in new.get("tags", []) and state == "open"):
+instance = not old and "parent" in new  # taskwarrior adds it from a recurring task
+if not human and not old and not instance and state != "idea" and not ("bug" in new.get("tags", []) and state == "open"):
     refuse(f"{actor} may add an idea, or a +bug as open; the human approves the rest")
 if not human and old and state != was and state not in ASSISTANT_MOVES[was]:
     if was == "idea":
@@ -79,7 +83,7 @@ if state in ("open", "doing") and state != was and not any(DONE_WHEN in text.upp
     refuse(f"a task needs its definition of done before it is {state}: "
            f"add '{DONE_WHEN} <what shows it is done>' to its body or a comment")
 
-if not old:
+if not old and not instance:
     new["author"] = actor
 elif new != old:
     new["changed_by"] = actor

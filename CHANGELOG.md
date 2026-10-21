@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+## [0.12.0] — 2026-10-21
+
+- Recurring tasks work: the template keeps its `recurring` status, and each instance taskwarrior adds keeps the template's author and state.
+
 ## [0.11.0] — 2026-10-21
 
 - A task needs `DONE WHEN:` in its body or a comment before it is open or doing.
@@ -9,7 +13,7 @@
 ## [0.10.0] — 2026-10-21
 
 - `squire init` adds a hook that gives every Claude Code session and subagent the installed skill at its start.
-- The skill says: ask for a step only the human may do on the task the work belongs to.
+- The skill tells an assistant to ask the human for a deploy, a manual test or an approval in a comment on the current task, and not to add a new task for it.
 
 ## [0.9.0] — 2026-10-21
 
