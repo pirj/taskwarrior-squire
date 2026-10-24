@@ -20,7 +20,7 @@ first command.
 
     task mine
 
-It lists the live, unblocked tasks assigned to you, the current version first, with
+It lists the live, unblocked tasks assigned to you, by version, with
 what you are asked on top. A comment from the human is an answer: act on it.
 `task board` lists every live task on one line.
 
