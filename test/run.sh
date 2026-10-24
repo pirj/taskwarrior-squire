@@ -98,6 +98,12 @@ codex "$bug" modify state:rejected
 check "rejected closes the task" "$(field "$bug" status) $(field "$bug" end | cut -c1-2)" "deleted 20"
 claude add "flaky spec" +bug state:open assignee:claude "body:DONE WHEN: 100 runs pass"
 flaky=$(task /flaky/ _uuid)
+claude "$flaky" modify state:doing
+claude "$flaky" modify assignee:"$USER"
+check "an assistant does not hand over a task in doing" "$(field "$flaky" assignee)" claude
+claude "$flaky" modify state:open assignee:"$USER"
+check "an assistant hands over a task in open" "$(field "$flaky" assignee)" "$USER"
+human "$flaky" modify assignee:claude
 claude "$flaky" delete
 check "a deleted task is rejected" "$(field "$flaky" state)" rejected
 
@@ -119,17 +125,18 @@ check "an unknown state is refused" "$(field "$mine" state)" idea
 
 claude add "pick the cops" assignee:"$USER" "body:all, or enabled only?"
 asked=$(task /cops/ _uuid)
-claude add "run them on the specs too" assignee:"$USER"
-question=$(task /specs/ _uuid)
+claude add "run them on the specs too" assignee:claude
+question=$(task /run.them.on/ _uuid)
 claude "$question" annotate "on the specs as well?"
+claude "$question" modify assignee:"$USER"
 claude "$question" annotate "built the specs part meanwhile"
+check "an assistant does not comment on a task that waits for the human" "$(comments "$question")" 1
 claude add "later" assignee:"$USER" depends:"$asked"
 codex add "codex's own work" +bug state:open assignee:codex "body:DONE WHEN: it works"
 human "$mine" modify state:postponed
 list=$(task mine)
 check "mine lists the human's live, unblocked tasks" "$(echo "$list" | grep -c '^## ')" 2
-check "mine shows the question under a later comment" "$(echo "$list" | grep -c '^\[claude\] on the specs as well?$')" 1
-check "mine shows every comment since the assignee's last" "$(echo "$list" | grep -c '^\[claude\] built the specs part meanwhile$')" 1
+check "mine shows the question" "$(echo "$list" | grep -c '^\[claude\] on the specs as well?$')" 1
 check "mine shows the body when nobody asked" "$(echo "$list" | grep -c '^all, or enabled only?$')" 1
 check "each assistant sees only its own work" "$(SQUIRE_AUTHOR=codex task mine | grep -c '^## ')" 1
 check "mine shows the tags" "$(SQUIRE_AUTHOR=codex task mine | grep -c '^open · +bug$')" 1

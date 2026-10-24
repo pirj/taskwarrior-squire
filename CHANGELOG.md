@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+## [0.14.0] — 2026-10-24
+
+- An assistant hands a task to the human in idea, open or fixed, never in doing, and does not comment on it while the human has it.
+- `task mine` shows the newest comment by someone else again: that comment is the question.
+
 ## [0.13.0] — 2026-10-24
 
 - `task mine` shows every comment by someone else since the assignee's own last comment, so a question stays visible under a later status note.

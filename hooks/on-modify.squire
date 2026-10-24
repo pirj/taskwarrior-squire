@@ -64,9 +64,13 @@ for tag in set(new.get("tags", [])) - set(old.get("tags", [])):
                f"as text; put a number in a field, such as version:{tag}")
 
 known = {(a["entry"], a["description"]) for a in old.get("annotations", [])}
+waits = not human and old.get("assignee") == new.get("assignee") == os.environ["USER"]
 for annotation in new.get("annotations", []):
     if (annotation["entry"], annotation["description"]) in known:
         continue
+    if waits:
+        refuse(f"the task waits for the human, and its last comment is the question; "
+               f"to add to it, take the task back with modify assignee:{actor}, then ask again in full")
     check_length("comment", annotation["description"], COMMENT_MAX)
     annotation["description"] = f"[{actor}] {annotation['description']}"
 
@@ -78,6 +82,9 @@ if not human and old and state != was and state not in ASSISTANT_MOVES[was]:
     if was == "idea":
         refuse(f"only the human decides on an idea; {actor} may not move it to {state}")
     refuse(f"{actor} may not move a task from {was} to {state}; the flow is {FLOW}")
+if not human and state == "doing" and new.get("assignee") == os.environ["USER"] != old.get("assignee"):
+    refuse("a task in doing stays with its assignee; to ask for a decision, move it to open, "
+           "and to ask for a check, finish it to fixed")
 texts = [new.get("body", "")] + [a["description"] for a in new.get("annotations", [])]
 if state in ("open", "doing") and state != was and not any(DONE_WHEN in text.upper() for text in texts):
     refuse(f"a task needs its definition of done before it is {state}: "

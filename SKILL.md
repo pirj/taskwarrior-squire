@@ -62,18 +62,29 @@ Work only on a task in state `open`, in this order:
 ## Asking the human
 
 The human is needed only for product scope, a public promise, a risk they own,
-or a trade-off with no technically correct answer. A fact you can measure is
-not a question: measure it and write it into the task.
+a trade-off with no technically correct answer, or a step only they may do. A
+fact you can measure is not a question: measure it and write it into the task.
 
-1. `task <uuid> annotate "<the question>"`, in plain words, at most 500
-   characters: `BROKEN: … HARM: … (A) … COST: … (B) … COST: … RECOMMENDATION: …`
+The state of a task you hand over says what you ask:
+
+| State | You ask the human to | Your comment |
+|---|---|---|
+| `idea` | approve the scope | the body says what and why, and `DONE WHEN:` |
+| `open` | decide | `BROKEN: … HARM: … (A) … COST: … (B) … COST: … RECOMMENDATION: …` |
+| `fixed` | check or deploy by hand | `CHECK: <what to run or open> EXPECT: <what they must see>` |
+
+A task in `doing` stays with you. To ask for a decision, move it to `open`;
+to ask for a check, finish it to `fixed`.
+
+1. Write the comment so the human can answer from it alone: plain words, at
+   most 500 characters, nothing they must open or look up.
+   `task <uuid> annotate "<the comment>"`.
 2. `task <uuid> modify assignee:$USER`.
-3. Continue with other work. Do not guess the answer. Do not ask in chat.
+3. Continue with other work. Do not ask in chat.
 
-The same goes for what only the human may do: a push to production, a manual
-test, a script your permissions forbid, an approval. Ask on the task the work
-belongs to; do not add a task for it. Say exactly what to run or check, and
-assign the task to the human.
+While the task is with the human, do not comment on it: the hook refuses. Your
+last comment is what they read. To change it, take the task back with
+`task <uuid> modify assignee:$SQUIRE_AUTHOR`, then ask again in full.
 
 The human answers with `task <uuid> annotate "<the answer>"` and assigns the
 task back to you; on an idea, that `modify` also sets `state:open`, `rejected` or

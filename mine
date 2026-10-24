@@ -2,8 +2,7 @@
 """task mine: the live tasks assigned to $SQUIRE_AUTHOR (else $USER), most urgent first.
 
 A section shows the state, priority, version, ref and tags of the task, and what
-the assignee is asked: every comment by someone else since the assignee's own
-last comment, else the body.
+the assignee is asked: the newest comment by someone else, else the body.
 Arguments narrow the filter.
 """
 import json
@@ -24,9 +23,8 @@ def author_of(annotation):
 
 
 for t in sorted(tasks, key=lambda t: -t["urgency"]):
-    comments = [a["description"] for a in t.get("annotations", [])]
-    own = [i for i, a in enumerate(t.get("annotations", [])) if author_of(a) == actor]
-    request = "\n\n".join(comments[own[-1] + 1 if own else 0:]) or t.get("body")
+    request = next((a["description"] for a in reversed(t.get("annotations", []))
+                    if author_of(a) != actor), t.get("body"))
     print(f"## {t['uuid'][:8]} — {t['description']}\n")
     tags = " ".join(f"+{tag}" for tag in t.get("tags", []))
     print(" · ".join(filter(None, (t.get("state"), t.get("priority"), t.get("version"), t.get("ref"), tags))))

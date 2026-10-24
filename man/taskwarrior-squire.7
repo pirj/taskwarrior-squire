@@ -120,8 +120,7 @@ the live, unblocked tasks assigned to
 most urgent first.
 Each one shows its state, priority, version, ref and tags,
 and what the assignee is asked:
-every comment by someone else since the assignee's own last comment,
-else the body.
+the newest comment by someone else, else the body.
 .It Cm board
 every live task on one line: UUID, state, assignee, priority, version, ref
 and title, most urgent first.
@@ -183,7 +182,10 @@ The task leaves mine until the other one is done.
 task <uuid> annotate "<the question>"
 task <uuid> modify assignee:$USER
 .Ed
-The same goes for an approval, a manual test or a push to production.
+An idea asks for approval, an open task for a decision, a fixed task for a
+check by hand.
+A task in doing stays with its assignee.
+While the task is with the human, an assistant does not comment on it.
 .It Answer (the human):
 .Bd -literal -compact
 task <uuid> annotate "<the answer>"
