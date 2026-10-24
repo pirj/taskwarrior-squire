@@ -8,7 +8,7 @@ Frustrated with a 1.4 MB `TODO.md` whose longest line ran to 66 KB, I wrote squi
 - **A definition of done.** A task in `open` or `doing` says `DONE WHEN:` in its body or a comment, so whoever verifies it knows what to check.
 - **Assignee.** `assignee` says who acts next: the human or an assistant.
 - **Hand-offs.** When an assistant needs the human for a question, an approval, a manual test or a push to production, it comments what it needs and assigns the task to the human. The human answers in a comment and assigns the task back.
-- **`task mine`.** The live, unblocked tasks assigned to whoever runs it, most urgent first, each with the question on top. For an assistant, it is the work queue.
+- **`task mine`.** The live, unblocked tasks assigned to whoever runs it, by version and then by urgency, each with the question on top. For an assistant, it is the work queue.
 - **`task board`.** Every live task on one line: UUID, state, assignee, priority, version, ref, title.
 - **Authors.** Every task, change and comment records who made it.
 - **Hygiene.** A title is at most 80 characters, a body 800, a comment 500, for everyone. A tag starts with a letter.

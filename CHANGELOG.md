@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+## [0.15.0] — 2026-10-24
+
+- `task mine` lists tasks with no version first, then by version, the most urgent first within each.
+
 ## [0.14.0] — 2026-10-24
 
 - An assistant hands a task to the human in idea, open or fixed, never in doing, and does not comment on it while the human has it.

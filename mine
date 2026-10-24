@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-"""task mine: the live tasks assigned to $SQUIRE_AUTHOR (else $USER), most urgent first.
+"""task mine: the live tasks assigned to $SQUIRE_AUTHOR (else $USER): tasks with no
+version first, then by version, the most urgent first within each.
 
 A section shows the state, priority, version, ref and tags of the task, and what
 the assignee is asked: the newest comment by someone else, else the body.
@@ -22,7 +23,11 @@ def author_of(annotation):
     return match and match.group(1)
 
 
-for t in sorted(tasks, key=lambda t: -t["urgency"]):
+def version(t):
+    return tuple(int(part) if part.isdigit() else 0 for part in re.split(r"[.-]", t.get("version", "")) if part)
+
+
+for t in sorted(tasks, key=lambda t: (version(t), -t["urgency"])):
     request = next((a["description"] for a in reversed(t.get("annotations", []))
                     if author_of(a) != actor), t.get("body"))
     print(f"## {t['uuid'][:8]} — {t['description']}\n")

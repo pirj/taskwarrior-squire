@@ -136,6 +136,10 @@ codex add "codex's own work" +bug state:open assignee:codex "body:DONE WHEN: it 
 human "$mine" modify state:postponed
 list=$(task mine)
 check "mine lists the human's live, unblocked tasks" "$(echo "$list" | grep -c '^## ')" 2
+human add "for a later version" version:0.10 priority:H assignee:"$USER" "body:DONE WHEN: later"
+human add "for the next version" version:0.9 assignee:"$USER" "body:DONE WHEN: next"
+check "mine puts tasks with no version first, then by version" \
+  "$(task mine | grep '^## ' | tail -2 | cut -d' ' -f4- | tr '\n' '|')" "for the next version|for a later version|"
 check "mine shows the question" "$(echo "$list" | grep -c '^\[claude\] on the specs as well?$')" 1
 check "mine shows the body when nobody asked" "$(echo "$list" | grep -c '^all, or enabled only?$')" 1
 check "each assistant sees only its own work" "$(SQUIRE_AUTHOR=codex task mine | grep -c '^## ')" 1

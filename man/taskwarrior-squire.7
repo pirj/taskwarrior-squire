@@ -116,8 +116,8 @@ The human moves a task to any state.
 .Bl -tag -width board
 .It Cm mine
 the live, unblocked tasks assigned to
-.Ev SQUIRE_AUTHOR ,
-most urgent first.
+.Ev SQUIRE_AUTHOR :
+tasks with no version first, then by version, the most urgent first within each.
 Each one shows its state, priority, version, ref and tags,
 and what the assignee is asked:
 the newest comment by someone else, else the body.
