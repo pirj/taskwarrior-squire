@@ -122,12 +122,14 @@ asked=$(task /cops/ _uuid)
 claude add "run them on the specs too" assignee:"$USER"
 question=$(task /specs/ _uuid)
 claude "$question" annotate "on the specs as well?"
+claude "$question" annotate "built the specs part meanwhile"
 claude add "later" assignee:"$USER" depends:"$asked"
 codex add "codex's own work" +bug state:open assignee:codex "body:DONE WHEN: it works"
 human "$mine" modify state:postponed
 list=$(task mine)
 check "mine lists the human's live, unblocked tasks" "$(echo "$list" | grep -c '^## ')" 2
-check "mine shows the newest question" "$(echo "$list" | grep -c '^\[claude\] on the specs as well?$')" 1
+check "mine shows the question under a later comment" "$(echo "$list" | grep -c '^\[claude\] on the specs as well?$')" 1
+check "mine shows every comment since the assignee's last" "$(echo "$list" | grep -c '^\[claude\] built the specs part meanwhile$')" 1
 check "mine shows the body when nobody asked" "$(echo "$list" | grep -c '^all, or enabled only?$')" 1
 check "each assistant sees only its own work" "$(SQUIRE_AUTHOR=codex task mine | grep -c '^## ')" 1
 check "mine shows the tags" "$(SQUIRE_AUTHOR=codex task mine | grep -c '^open · +bug$')" 1

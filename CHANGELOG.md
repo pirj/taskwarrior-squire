@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+## [0.13.0] — 2026-10-24
+
+- `task mine` shows every comment by someone else since the assignee's own last comment, so a question stays visible under a later status note.
+
 ## [0.12.0] — 2026-10-21
 
 - Recurring tasks work: the template keeps its `recurring` status, and each instance taskwarrior adds keeps the template's author and state.
