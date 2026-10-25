@@ -145,6 +145,7 @@ check "mine shows the body when nobody asked" "$(echo "$list" | grep -c '^all, o
 check "each assistant sees only its own work" "$(SQUIRE_AUTHOR=codex task mine | grep -c '^## ')" 1
 check "mine shows the tags" "$(SQUIRE_AUTHOR=codex task mine | grep -c '^open · +bug$')" 1
 claude add "a long title that wraps when the terminal is eighty columns wide" +bug state:open "body:DONE WHEN: it fits"
+check "board shows the tags" "$(task /wraps.when/ board | grep -c ' bug ')" 1
 check "board shows one line per live task" "$(task board | wc -l | tr -d ' ')" "$(task status:pending count)"
 
 human rc.recurrence=off add "monthly scan" recur:monthly due:tomorrow state:open assignee:claude "body:DONE WHEN: the scan is filed"

@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+## [0.16.0] — 2026-10-25
+
+- `task board` shows the tags of each task.
+
 ## [0.15.0] — 2026-10-24
 
 - `task mine` lists tasks with no version first, then by version, the most urgent first within each.
