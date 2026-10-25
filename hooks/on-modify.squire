@@ -7,6 +7,7 @@ refusal and a non-zero exit.
 """
 import json
 import os
+import re
 import sys
 
 TITLE_MAX = 80
@@ -34,6 +35,12 @@ human = actor == os.environ["USER"]
 def refuse(message):
     print(message)
     sys.exit(1)
+
+
+def version_order(version):
+    """A text that sorts like the version: 0.9 before 0.10, no version first."""
+    return ".".join(part.zfill(6) if part.isdigit() else "000000"
+                    for part in re.split(r"[.-]", version) if part) or "0"
 
 
 def check_length(field, text, limit):
@@ -90,6 +97,7 @@ if state in ("open", "doing") and state != was and not any(DONE_WHEN in text.upp
     refuse(f"a task needs its definition of done before it is {state}: "
            f"add '{DONE_WHEN} <what shows it is done>' to its body or a comment")
 
+new["version_order"] = version_order(new.get("version", ""))
 if not old and not instance:
     new["author"] = actor
 elif new != old:

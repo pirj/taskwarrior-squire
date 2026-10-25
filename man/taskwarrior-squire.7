@@ -123,7 +123,8 @@ and what the assignee is asked:
 the newest comment by someone else, else the body.
 .It Cm board
 every live task on one line: UUID, state, assignee, priority, version, ref,
-tags and title, most urgent first.
+tags and title: tasks with no version first, then by version, the most urgent
+first within each.
 .El
 .Ss The flow, command by command
 .Bl -tag -width Ds

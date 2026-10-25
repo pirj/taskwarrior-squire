@@ -9,7 +9,7 @@ Frustrated with a 1.4 MB `TODO.md` whose longest line ran to 66 KB, I wrote squi
 - **Assignee.** `assignee` says who acts next: the human or an assistant.
 - **Hand-offs.** When an assistant needs the human for a question, an approval, a manual test or a push to production, it comments what it needs and assigns the task to the human. The human answers in a comment and assigns the task back.
 - **`task mine`.** The live, unblocked tasks assigned to whoever runs it, by version and then by urgency, each with the question on top. For an assistant, it is the work queue.
-- **`task board`.** Every live task on one line: UUID, state, assignee, priority, version, ref, tags, title.
+- **`task board`.** Every live task on one line: UUID, state, assignee, priority, version, ref, tags, title; by version, then by urgency.
 - **Authors.** Every task, change and comment records who made it.
 - **Hygiene.** A title is at most 80 characters, a body 800, a comment 500, for everyone. A tag starts with a letter.
 - **A skill** that teaches an assistant all of the above.
@@ -105,6 +105,10 @@ Tests: `make test`.
 - **GitHub Issues**: needs the network, and the assistant writes with the human's token, so every author is the human.
 - **Jira**: no.
 - **[DoltLite](https://www.dolthub.com/blog/2026-03-25-doltlite/)** as the storage, not yet: it is a SQLite with commits and merges, and TaskChampion's storage is pluggable. Two branches would then merge their tasks.
+
+### Roadmap
+
+- **ICE priority, as an option.** Impact, confidence and ease, each from 1 to 10, as three fields that add to urgency. It comes as a taskrc file that you include from `~/.taskrc` if you want it. Without the include, squire works as it does now.
 
 ### License
 

@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+## [0.17.0] — 2026-10-25
+
+- `task board` lists tasks by version, then by urgency. `squire init` gives older tasks the field it sorts by.
+
 ## [0.16.0] — 2026-10-25
 
 - `task board` shows the tags of each task.

@@ -146,6 +146,8 @@ check "each assistant sees only its own work" "$(SQUIRE_AUTHOR=codex task mine |
 check "mine shows the tags" "$(SQUIRE_AUTHOR=codex task mine | grep -c '^open · +bug$')" 1
 claude add "a long title that wraps when the terminal is eighty columns wide" +bug state:open "body:DONE WHEN: it fits"
 check "board shows the tags" "$(task /wraps.when/ board | grep -c ' bug ')" 1
+check "board puts tasks with no version first, then by version" \
+  "$(task board | grep -oE '(later|for the next version|for a later version)$' | tr '\n' '|')" "later|for the next version|for a later version|"
 check "board shows one line per live task" "$(task board | wc -l | tr -d ' ')" "$(task status:pending count)"
 
 human rc.recurrence=off add "monthly scan" recur:monthly due:tomorrow state:open assignee:claude "body:DONE WHEN: the scan is filed"
@@ -154,5 +156,15 @@ check "an assistant's command adds the instance" "$?" 0
 check "a recurring task stays a template" "$(task export | python3 -c "import json,sys; print(sum(t['status'] == 'recurring' for t in json.load(sys.stdin)))")" 1
 check "the instance keeps the template's author" \
   "$(task status:pending /monthly/ export | python3 -c "import json,sys; t=json.load(sys.stdin)[0]; print(t['state'], t['author'], 'parent' in t)")" "open $USER True"
+
+human rc.hooks=off add "written before the version order" version:0.9
+squire init >/dev/null
+check "init gives older tasks the version order" "$(field "$(task /before.the.version.order/ _uuid)" version_order)" "000000.000009"
+
+human add "answer me" assignee:claude "body:DONE WHEN: answered"
+answered=$(task /answer.me/ _uuid)
+human "$answered" annotate "the answer"
+claude "$answered" annotate "my note"
+check "mine shows the newest comment by someone else" "$(SQUIRE_AUTHOR=claude task mine /answer.me/ | grep -c "^\[$USER\] the answer$")" 1
 
 [ "$failures" -eq 0 ]

@@ -10,7 +10,7 @@ report.board.description=Live tasks, one line each
 report.board.columns=uuid.short,state,assignee,priority,version,ref,tags,description.truncated_count
 report.board.labels=UUID,State,Assignee,P,Version,Ref,Tags,Title
 report.board.filter=status:pending
-report.board.sort=urgency-
+report.board.sort=version_order+,urgency-
 
 uda.state.type=string
 uda.state.label=State
@@ -22,6 +22,9 @@ uda.assignee.label=Assignee
 
 uda.version.type=string
 uda.version.label=Version
+
+uda.version_order.type=string
+uda.version_order.label=Version order
 
 uda.body.type=string
 uda.body.label=Body

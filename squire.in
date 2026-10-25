@@ -8,8 +8,11 @@ installed SKILL.md into every session and subagent, and in .claude/skills/ a
 skill that reads it, so both follow upgrades. taskwarrior
 creates the database on first use. Everything after that is `task`: man taskwarrior-squire.
 """
+import collections
 import json
 import os
+import re
+import subprocess
 import sys
 
 SHARE = "@SHARE@"
@@ -39,6 +42,20 @@ if not os.path.exists(home_rc):
 
 say("set these in this directory's environment (mise, direnv, an .env loader…):")
 print(f"  TASKRC={TASKRC}\n  TASKDATA={project}")
+
+# board sorts by version_order, which the hook writes; give it to the tasks the hook has not seen.
+task = ["task", "rc.hooks=off"]
+env = dict(os.environ, TASKRC=TASKRC, TASKDATA=project)
+if os.path.exists("taskchampion.sqlite3"):
+    unseen = collections.defaultdict(list)
+    for t in json.loads(subprocess.run(task + ["export"], env=env, check=True, capture_output=True, text=True).stdout):
+        if "version_order" not in t:
+            order = ".".join(p.zfill(6) if p.isdigit() else "000000" for p in re.split(r"[.-]", t.get("version", "")) if p) or "0"
+            unseen[order].append(t["uuid"])
+    for order, uuids in unseen.items():
+        subprocess.run(task + uuids + ["modify", f"version_order:{order}"], env=env, check=True, capture_output=True)
+    if unseen:
+        say(f"gave {sum(map(len, unseen.values()))} task(s) the version order that task board sorts by")
 
 if os.path.isdir(".claude"):
     path = ".claude/settings.json"
