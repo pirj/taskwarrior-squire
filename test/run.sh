@@ -157,9 +157,11 @@ check "a recurring task stays a template" "$(task export | python3 -c "import js
 check "the instance keeps the template's author" \
   "$(task status:pending /monthly/ export | python3 -c "import json,sys; t=json.load(sys.stdin)[0]; print(t['state'], t['author'], 'parent' in t)")" "open $USER True"
 
+for n in 1 2 3 4; do human rc.hooks=off add "old task $n"; done  # more than rc.bulk asks about
 human rc.hooks=off add "written before the version order" version:0.9
 squire init >/dev/null
 check "init gives older tasks the version order" "$(field "$(task /before.the.version.order/ _uuid)" version_order)" "000000.000009"
+check "init gives the order to many tasks at once" "$(task /old.task/ export | python3 -c "import json,sys; print(sorted({t.get('version_order') for t in json.load(sys.stdin)}))")" "['0']"
 
 human add "answer me" assignee:claude "body:DONE WHEN: answered"
 answered=$(task /answer.me/ _uuid)

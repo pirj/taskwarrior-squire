@@ -44,7 +44,7 @@ say("set these in this directory's environment (mise, direnv, an .env loader…)
 print(f"  TASKRC={TASKRC}\n  TASKDATA={project}")
 
 # board sorts by version_order, which the hook writes; give it to the tasks the hook has not seen.
-task = ["task", "rc.hooks=off"]
+task = ["task", "rc.hooks=off", "rc.bulk=0"]
 env = dict(os.environ, TASKRC=TASKRC, TASKDATA=project)
 if os.path.exists("taskchampion.sqlite3"):
     unseen = collections.defaultdict(list)
@@ -53,7 +53,10 @@ if os.path.exists("taskchampion.sqlite3"):
             order = ".".join(p.zfill(6) if p.isdigit() else "000000" for p in re.split(r"[.-]", t.get("version", "")) if p) or "0"
             unseen[order].append(t["uuid"])
     for order, uuids in unseen.items():
-        subprocess.run(task + uuids + ["modify", f"version_order:{order}"], env=env, check=True, capture_output=True)
+        done = subprocess.run(task + uuids + ["modify", f"version_order:{order}"], env=env,
+                              stdin=subprocess.DEVNULL, capture_output=True, text=True)
+        if done.returncode:
+            sys.exit(f"squire: task modify version_order:{order} failed: {done.stdout}{done.stderr}")
     if unseen:
         say(f"gave {sum(map(len, unseen.values()))} task(s) the version order that task board sorts by")
 

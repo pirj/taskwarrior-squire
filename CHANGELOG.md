@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+## [0.17.1] — 2026-10-25
+
+- `squire init` gives the version order to more than three tasks at once.
+
 ## [0.17.0] — 2026-10-25
 
 - `task board` lists tasks by version, then by urgency. `squire init` gives older tasks the field it sorts by.
