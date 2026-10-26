@@ -6,6 +6,7 @@
 .Nd taskwarrior for one human and the AI assistants who work for them
 .Sh SYNOPSIS
 .Nm squire Cm init
+.Nm squire Cm tui
 .Pp
 .Ev TASKRC Ns = Ns Pa $PREFIX/share/taskwarrior-squire/taskrc
 .Ev TASKDATA Ns = Ns Pa <project>
@@ -126,6 +127,32 @@ every live task on one line: UUID, state, assignee, priority, version, ref,
 tags and title: tasks with no version first, then by version, the most urgent
 first within each.
 .El
+.Ss The human's inbox
+.Nm squire Cm tui
+opens
+taskwarrior-tui
+on the live, unblocked tasks that wait for the human,
+one task in full under the list.
+Besides its own keys:
+.Bl -tag -width Ds -compact
+.It Cm o
+approve the idea; it goes to whoever asked.
+.It Cm n
+reject the task.
+.It Cm p
+postpone the task.
+.It Cm A
+comment; then
+.Cm b
+hands the task back to whoever asked.
+.It Cm d
+done, after a check.
+.El
+Whoever asked is the author of the newest comment by someone else,
+else the author of the task.
+taskwarrior-tui does not show why the hook refused a change.
+A refused comment is usually longer than 500 characters;
+its text stays in the prompt to shorten.
 .Ss The flow, command by command
 .Bl -tag -width Ds
 .It Add new scope (anyone):

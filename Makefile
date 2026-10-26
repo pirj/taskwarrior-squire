@@ -4,8 +4,11 @@ SHARE = $(PREFIX)/share/taskwarrior-squire
 RUNTIME ?= $(SHARE)
 
 install:
-	mkdir -p $(PREFIX)/bin $(SHARE)/hooks $(PREFIX)/share/man/man7
+	mkdir -p $(PREFIX)/bin $(SHARE)/hooks $(SHARE)/tui $(PREFIX)/share/man/man7
 	sed 's|@SHARE@|$(RUNTIME)|g' taskrc.in > $(SHARE)/taskrc
+	sed 's|@SHARE@|$(RUNTIME)|g' tui/taskrc.in > $(SHARE)/tui/taskrc
+	cp tui/hand $(SHARE)/tui/approve
+	for move in reject postpone back; do ln -sf approve $(SHARE)/tui/$$move; done
 	sed 's|@SHARE@|$(RUNTIME)|g' squire.in > $(PREFIX)/bin/squire
 	chmod +x $(PREFIX)/bin/squire
 	cp mine SKILL.md $(SHARE)/

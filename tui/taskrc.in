@@ -1,0 +1,17 @@
+# taskwarrior-squire for taskwarrior-tui; `squire tui` includes it. See taskwarrior-squire(7).
+report.inbox.description=Live tasks that wait for you, by version
+report.inbox.columns=state,priority,version,tags,description.count
+report.inbox.labels=State,P,Version,Tags,Title
+report.inbox.sort=version_order+,urgency-
+journal.info=off
+uda.taskwarrior-tui.task-report.info-location=bottom
+
+# o approves an idea, n rejects it, p postpones a task, b hands a task back after your comment (A)
+uda.taskwarrior-tui.shortcuts.1=@SHARE@/tui/approve
+uda.taskwarrior-tui.keyconfig.shortcut1=o
+uda.taskwarrior-tui.shortcuts.2=@SHARE@/tui/reject
+uda.taskwarrior-tui.keyconfig.shortcut2=n
+uda.taskwarrior-tui.shortcuts.3=@SHARE@/tui/postpone
+uda.taskwarrior-tui.keyconfig.shortcut3=p
+uda.taskwarrior-tui.shortcuts.4=@SHARE@/tui/back
+uda.taskwarrior-tui.keyconfig.shortcut4=b

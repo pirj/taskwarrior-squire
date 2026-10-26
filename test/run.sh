@@ -169,4 +169,20 @@ human "$answered" annotate "the answer"
 claude "$answered" annotate "my note"
 check "mine shows the newest comment by someone else" "$(SQUIRE_AUTHOR=claude task mine /answer.me/ | grep -c "^\[$USER\] the answer$")" 1
 
+moves="$project/prefix/share/taskwarrior-squire/tui"
+claude add "a dark theme" assignee:"$USER" "body:DONE WHEN: the page is dark"
+dark=$(task /dark.theme/ _uuid)
+"$moves/approve" "$dark"
+check "o in squire tui approves an idea and gives it to whoever asked" "$(field "$dark" state) $(field "$dark" assignee)" "open claude"
+claude add "a light theme" assignee:"$USER" "body:DONE WHEN: the page is light"
+light=$(task /light.theme/ _uuid)
+"$moves/reject" "$light"
+check "n in squire tui rejects an idea" "$(field "$light" state)" rejected
+claude "$dark" modify assignee:"$USER"
+human "$dark" annotate "only the settings page"
+"$moves/back" "$dark"
+check "b in squire tui hands a task back after the answer" "$(field "$dark" state) $(field "$dark" assignee)" "open claude"
+mkdir "$project/stub" && printf '#!/bin/sh\ntask _get rc.report.inbox.filter\n' > "$project/stub/taskwarrior-tui" && chmod +x "$project/stub/taskwarrior-tui"
+check "squire tui lists the tasks that wait for the human" "$(PATH="$project/stub:$PATH" squire tui)" "+READY state.not:postponed assignee:$USER"
+
 [ "$failures" -eq 0 ]

@@ -10,6 +10,7 @@ Frustrated with a 1.4 MB `TODO.md` whose longest line ran to 66 KB, I wrote squi
 - **Hand-offs.** When an assistant needs the human for a question, an approval, a manual test or a push to production, it comments what it needs and assigns the task to the human. The human answers in a comment and assigns the task back.
 - **`task mine`.** The live, unblocked tasks assigned to whoever runs it, by version and then by urgency, each with the question on top. For an assistant, it is the work queue.
 - **`task board`.** Every live task on one line: UUID, state, assignee, priority, version, ref, tags, title; by version, then by urgency.
+- **`squire tui`.** The human's inbox in [taskwarrior-tui](https://github.com/kdheepak/taskwarrior-tui): the tasks that wait for them, one in full under the list. `o` approves an idea, `n` rejects, `p` postpones, `A` comments and `b` hands the task back, `d` closes it.
 - **Authors.** Every task, change and comment records who made it.
 - **Hygiene.** A title is at most 80 characters, a body 800, a comment 500, for everyone. A tag starts with a letter.
 - **A skill** that teaches an assistant all of the above.
@@ -69,6 +70,7 @@ The human:
     task 9c1e0f2a annotate "B: only the default cops" && task 9c1e0f2a modify assignee:claude
     task 77ab31d0 modify state:open
     task state:idea board
+    squire tui
 
 The assistant:
 

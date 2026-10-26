@@ -1,0 +1,30 @@
+#!/usr/bin/env python3
+"""The human's moves in taskwarrior-tui, one per name: approve, reject, postpone, back.
+
+Each takes the selected tasks' UUIDs. approve and back give the task to whoever
+asked: the author of the newest comment by someone else, else the task's author.
+"""
+import json
+import os
+import re
+import subprocess
+import sys
+
+human = os.environ["USER"]
+MOVES = {"approve": (["state:open"], True), "reject": (["state:rejected"], False),
+         "postpone": (["state:postponed"], False), "back": ([], True)}  # the change, and whether the asker gets the task
+
+
+def asker(t):
+    for annotation in reversed(t.get("annotations", [])):
+        if (m := re.match(r"\[([^\]]+)\] ", annotation["description"])) and m.group(1) != human:
+            return m.group(1)
+    return t.get("author", human)
+
+
+change, handed = MOVES[os.path.basename(sys.argv[0])]
+for t in json.loads(subprocess.run(["task", *sys.argv[1:], "export"], check=True, capture_output=True, text=True).stdout):
+    done = subprocess.run(["task", t["uuid"], "modify", *change, *([f"assignee:{asker(t)}"] if handed else [])],
+                          capture_output=True, text=True)
+    if done.returncode:
+        sys.exit(f"{t['uuid'][:8]}: {(done.stderr or done.stdout).strip()}")

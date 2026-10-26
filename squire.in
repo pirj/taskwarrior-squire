@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """squire init: point the project in the current directory at taskwarrior-squire.
+squire tui: open taskwarrior-tui on the tasks that wait for you.
 
 It prints TASKRC and TASKDATA for you to set in this directory, with whatever
 sets your per-directory environment. When .claude/ exists, it writes them for
@@ -14,6 +15,7 @@ import os
 import re
 import subprocess
 import sys
+import tempfile
 
 SHARE = "@SHARE@"
 TASKRC = f"{SHARE}/taskrc"
@@ -27,8 +29,17 @@ HOOK = ("python3 -c 'import json, sys; event = json.load(sys.stdin)[\"hook_event
         "print(json.dumps({\"hookSpecificOutput\": {\"hookEventName\": event, \"additionalContext\": text}}))'")
 project = os.getcwd()
 
+if sys.argv[1:] == ["tui"]:
+    with tempfile.NamedTemporaryFile("w", suffix=".taskrc") as rc:
+        rc.write(f"include {os.environ.get('TASKRC', TASKRC)}\ninclude {SHARE}/tui/taskrc\n"
+                 f"report.inbox.filter=+READY state.not:postponed assignee:{os.environ['USER']}\n")
+        rc.flush()
+        try:
+            sys.exit(subprocess.run(["taskwarrior-tui", "--report", "inbox"], env=dict(os.environ, TASKRC=rc.name)).returncode)
+        except FileNotFoundError:
+            sys.exit("squire tui needs taskwarrior-tui: brew install taskwarrior-tui")
 if sys.argv[1:] != ["init"]:
-    sys.exit(__doc__.strip() + "\n\nusage: squire init")
+    sys.exit(__doc__.strip() + "\n\nusage: squire init | squire tui")
 
 
 def say(text):

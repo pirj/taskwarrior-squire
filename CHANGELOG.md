@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+## [0.18.0] — 2026-10-26
+
+- `squire tui` opens taskwarrior-tui on the tasks that wait for the human, with keys that approve, reject, postpone and hand a task back.
+
 ## [0.17.1] — 2026-10-25
 
 - `squire init` gives the version order to more than three tasks at once.
